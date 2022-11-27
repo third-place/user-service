@@ -2,11 +2,11 @@ package controller
 
 import (
 	"encoding/json"
-	"github.com/danielmunro/otto-user-service/internal/db"
-	"github.com/danielmunro/otto-user-service/internal/model"
-	"github.com/danielmunro/otto-user-service/internal/repository"
-	"github.com/danielmunro/otto-user-service/internal/service"
-	"github.com/danielmunro/otto-user-service/internal/util"
+	"github.com/third-place/user-service/internal/db"
+	"github.com/third-place/user-service/internal/model"
+	"github.com/third-place/user-service/internal/repository"
+	"github.com/third-place/user-service/internal/service"
+	"github.com/third-place/user-service/internal/util"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"

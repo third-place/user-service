@@ -1,4 +1,4 @@
-module github.com/danielmunro/otto-user-service
+module github.com/third-place/user-service
 
 go 1.19
 

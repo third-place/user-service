@@ -1,8 +1,8 @@
 package mapper
 
 import (
-	"github.com/danielmunro/otto-user-service/internal/entity"
-	"github.com/danielmunro/otto-user-service/internal/model"
+	"github.com/third-place/user-service/internal/entity"
+	"github.com/third-place/user-service/internal/model"
 )
 
 func MapUserEntityToModel(user *entity.User) *model.User {

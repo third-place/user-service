@@ -1,9 +1,9 @@
 package kafka
 
 import (
-	"github.com/danielmunro/otto-user-service/internal/db"
-	"github.com/danielmunro/otto-user-service/internal/model"
-	"github.com/danielmunro/otto-user-service/internal/repository"
+	"github.com/third-place/user-service/internal/db"
+	"github.com/third-place/user-service/internal/model"
+	"github.com/third-place/user-service/internal/repository"
 	"github.com/google/uuid"
 	"log"
 )

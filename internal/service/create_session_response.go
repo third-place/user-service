@@ -3,8 +3,8 @@ package service
 import (
 	"encoding/json"
 	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
-	"github.com/danielmunro/otto-user-service/internal/entity"
-	"github.com/danielmunro/otto-user-service/internal/mapper"
+	"github.com/third-place/user-service/internal/entity"
+	"github.com/third-place/user-service/internal/mapper"
 )
 
 const challengeNewPasswordString = "ChallengeNewPassword"

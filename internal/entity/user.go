@@ -2,7 +2,7 @@ package entity
 
 import (
 	"encoding/json"
-	"github.com/danielmunro/otto-user-service/internal/model"
+	"github.com/third-place/user-service/internal/model"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 )

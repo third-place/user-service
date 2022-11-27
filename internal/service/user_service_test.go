@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/danielmunro/otto-user-service/internal/model"
+	"github.com/third-place/user-service/internal/model"
 	"github.com/joho/godotenv"
 	"math/rand"
 	"os"

@@ -2,8 +2,8 @@ package controller
 
 import (
 	"encoding/json"
-	"github.com/danielmunro/otto-user-service/internal/model"
-	"github.com/danielmunro/otto-user-service/internal/service"
+	"github.com/third-place/user-service/internal/model"
+	"github.com/third-place/user-service/internal/service"
 	"log"
 	"net/http"
 )

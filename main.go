@@ -5,10 +5,10 @@
 package main
 
 import (
-	"github.com/danielmunro/otto-user-service/internal"
-	"github.com/danielmunro/otto-user-service/internal/middleware"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/cors"
+	"github.com/third-place/user-service/internal"
+	"github.com/third-place/user-service/internal/middleware"
 	"log"
 	"net/http"
 )

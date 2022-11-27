@@ -10,7 +10,7 @@
 package internal
 
 import (
-	"github.com/danielmunro/otto-user-service/internal/controller"
+	"github.com/third-place/user-service/internal/controller"
 	"net/http"
 	"strings"
 

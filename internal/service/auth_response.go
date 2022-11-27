@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
-	"github.com/danielmunro/otto-user-service/internal/model"
+	"github.com/third-place/user-service/internal/model"
 )
 
 type AuthResponseType int

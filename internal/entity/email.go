@@ -1,7 +1,7 @@
 package entity
 
 import (
-	"github.com/danielmunro/otto-user-service/internal/enum"
+	"github.com/third-place/user-service/internal/enum"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 )
