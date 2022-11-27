@@ -3,9 +3,6 @@ kind: Deployment
 metadata:
   name: user-service
 spec:
-  minReadySeconds: 3
-  revisionHistoryLimit: 5
-  progressDeadlineSeconds: 60
   selector:
     matchLabels:
       app: user-service
