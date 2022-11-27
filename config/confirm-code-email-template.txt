@@ -1,0 +1,5 @@
+Your verification code is {####}.
+
+<a href="https://thirdplaceapp.com/otp?code={####}&username={username}">Confirm Your Account</a>
+
+Visit the above link to enter your code and confirm your account.

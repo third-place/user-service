@@ -1,0 +1,19 @@
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "The tag to deploy"
+        required: true
+        type: string
+jobs:
+  deploy-to-prod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: sudo snap install yq
+      - run: yq -i '.spec.template.spec.containers[0].image = "ghcr.io/${{ github.repository }}-consumer:${{ inputs.tag }}"' kustomize/prod/deployment-consumer.yaml
+      - run: yq -i '.spec.template.spec.containers[0].image = "ghcr.io/${{ github.repository }}:${{ inputs.tag }}"' kustomize/prod/deployment-service.yaml
+      - uses: EndBug/add-and-commit@v9
+        with:
+          default_author: github_actions
+          message: "Deploy version ${{ inputs.tag }} to production"

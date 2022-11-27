@@ -1,0 +1,57 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: user-service
+  description: Otto user service
+  links:
+    - url: https://github.com/third-place/user-service
+      title: Git Repository
+spec:
+  type: service
+  lifecycle: production
+  owner: dev-team
+  providesApis:
+    - user-service-api
+  dependsOn:
+    - resource:user-service-db
+    - resource:aws-cognito
+    - resource:kafka
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: user-service-api
+  description: Otto user service API
+  links:
+    - url: https://github.com/third-place/user-service
+      title: Git Repository
+spec:
+  type: openapi
+  lifecycle: production
+  owner: dev-team
+  definition:
+    $text: https://github.com/third-place/user-service/blob/main/api.yaml
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: user-service-db
+  description: Otto user service DB
+spec:
+  type: database
+  lifecycle: production
+  owner: dev-team
+  dependencyOf:
+    - api:user-service
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: aws-cognito
+  description: AWS Cognito instance
+spec:
+  type: service
+  lifecycle: production
+  owner: dev-team
+  dependencyOf:
+    - api:user-service
