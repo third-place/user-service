@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: user-service-consumer
-          image: ghcr.io/third-place/user-service-consumer:v0.1.1
+          image: ghcr.io/third-place/user-service-consumer:v0.1.3
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
