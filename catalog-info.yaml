@@ -2,7 +2,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: user-service
-  description: Otto user service
+  description: User service
   links:
     - url: https://github.com/third-place/user-service
       title: Git Repository
