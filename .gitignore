@@ -20,4 +20,4 @@ build/
 # env
 .env
 postgres-data/
-otto-user-service
+user-service
