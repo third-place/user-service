@@ -2,9 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: user-service-consumer
-  annotations:
-    prometheus.io/scrape: 'true'
-    prometheus.io/port: '9090'
 spec:
   selector:
     matchLabels:
