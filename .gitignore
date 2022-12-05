@@ -21,3 +21,4 @@ build/
 .env
 postgres-data/
 user-service
+vendor/
