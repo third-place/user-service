@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/danielmunro/otto-user-service/internal/db"
-	"github.com/danielmunro/otto-user-service/internal/entity"
 	"github.com/joho/godotenv"
+	"github.com/third-place/user-service/internal/db"
+	"github.com/third-place/user-service/internal/entity"
 )
 
 func main() {
