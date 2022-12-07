@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 )
 
 type Route struct {
@@ -28,6 +29,7 @@ type Routes []Route
 
 func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
+	router.Use(otelmux.Middleware("user-service"))
 	for _, route := range routes {
 		var handler http.Handler
 		handler = route.HandlerFunc

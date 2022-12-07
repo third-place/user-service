@@ -2,12 +2,15 @@ package controller
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"github.com/third-place/user-service/internal/db"
 	"github.com/third-place/user-service/internal/model"
 	"github.com/third-place/user-service/internal/repository"
 	"github.com/third-place/user-service/internal/service"
 	"github.com/third-place/user-service/internal/util"
-	"github.com/gorilla/mux"
+	"github.com/third-place/user-service/trace"
+	"go.opentelemetry.io/otel/attribute"
+	oteltrace "go.opentelemetry.io/otel/trace"
 	"log"
 	"net/http"
 )
@@ -15,6 +18,8 @@ import (
 // CreateNewUserV1 - Create a new user
 func CreateNewUserV1(w http.ResponseWriter, r *http.Request) {
 	newUserModel := model.DecodeRequestToNewUser(r)
+	_, span := trace.Tracer.Start(r.Context(), "CreateNewUserV1", oteltrace.WithAttributes(attribute.String("username", newUserModel.Username)))
+	defer span.End()
 	user, err := service.CreateDefaultUserService().CreateUser(newUserModel)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -36,6 +41,8 @@ func GetUserByUsernameV1(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "max-age=30")
 	params := mux.Vars(r)
 	username := params["username"]
+	_, span := trace.Tracer.Start(r.Context(), "GetUserByUsernameV1", oteltrace.WithAttributes(attribute.String("username", username)))
+	defer span.End()
 
 	user, err := service.CreateDefaultUserService().GetUserFromUsername(username)
 	if err != nil {
@@ -65,6 +72,8 @@ func UpdateUserV1(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
+	_, span := trace.Tracer.Start(r.Context(), "UpdateUserV1", oteltrace.WithAttributes(attribute.String("username", session.User.Username)))
+	defer span.End()
 	err = userService.UpdateUser(userModel)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -91,6 +100,8 @@ func BanUserV1(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	_, span := trace.Tracer.Start(r.Context(), "BanUserV1", oteltrace.WithAttributes(attribute.String("username", usernameParam)))
+	defer span.End()
 	sessionUser, err := userRepository.GetUserFromUsername(session.User.Username)
 	if err != nil || sessionUser.IsBanned {
 		log.Print("error 1 :: ", err.Error())
@@ -126,6 +137,8 @@ func UnbanUserV1(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	_, span := trace.Tracer.Start(r.Context(), "UnbanUserV1", oteltrace.WithAttributes(attribute.String("username", usernameParam)))
+	defer span.End()
 	sessionUser, err := userRepository.GetUserFromUsername(session.User.Username)
 	if err != nil || sessionUser.IsBanned {
 		w.WriteHeader(http.StatusBadRequest)
