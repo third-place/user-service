@@ -2,12 +2,12 @@ package controller
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"github.com/third-place/user-service/internal/db"
 	"github.com/third-place/user-service/internal/model"
 	"github.com/third-place/user-service/internal/repository"
 	"github.com/third-place/user-service/internal/service"
 	"github.com/third-place/user-service/internal/util"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 )
