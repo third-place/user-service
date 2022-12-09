@@ -16,7 +16,7 @@ func main() {
 	}
 	username := os.Args[1]
 	password := os.Args[2]
-	userService := service.CreateDefaultUserService()
+	userService := service.CreateUserService()
 	userRepository := repository.CreateUserRepository(db.CreateDefaultConnection())
 	user, err := userRepository.GetUserFromUsername(username)
 	if err != nil {

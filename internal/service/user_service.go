@@ -39,23 +39,11 @@ const AuthFlowRefreshToken = "REFRESH_TOKEN_AUTH"
 const AuthResponseChallenge = "NEW_PASSWORD_REQUIRED"
 const JwkTokenUrl = "https://cognito-idp.%s.amazonaws.com/%s/.well-known/jwks.json"
 
-func CreateDefaultUserService() *UserService {
-	conn := db.CreateDefaultConnection()
-	return CreateUserService(
-		repository.CreateUserRepository(conn),
-		repository.CreateInviteRepository(conn),
-		kafka2.CreateWriter(),
-	)
-}
-
-func CreateUserService(
-	userRepository *repository.UserRepository,
-	inviteRepository *repository.InviteRepository,
-	kafkaWriter *kafka.Producer,
-) *UserService {
+func CreateUserService() *UserService {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
+	conn := db.CreateDefaultConnection()
 
 	return &UserService{
 		cognito:             cognitoidentityprovider.New(sess),
@@ -63,9 +51,9 @@ func CreateUserService(
 		cognitoClientID:     os.Getenv("COGNITO_CLIENT_ID"),
 		cognitoClientSecret: os.Getenv("COGNITO_CLIENT_SECRET"),
 		awsRegion:           os.Getenv("AWS_REGION"),
-		userRepository:      userRepository,
-		inviteRepository:    inviteRepository,
-		kafkaWriter:         kafkaWriter,
+		userRepository:      repository.CreateUserRepository(conn),
+		inviteRepository:    repository.CreateInviteRepository(conn),
+		kafkaWriter:         kafka2.CreateWriter(),
 	}
 }
 
