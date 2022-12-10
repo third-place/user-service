@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/third-place/user-service/internal/model"
 	"github.com/third-place/user-service/internal/service"
+	"github.com/third-place/user-service/internal/util"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -13,9 +14,6 @@ import (
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
-
-var numbers = []rune("0123456789")
-var letters = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 // CreateInviteV1 -- create new invites for new users
 func CreateInviteV1(w http.ResponseWriter, r *http.Request) {
@@ -29,14 +27,14 @@ func CreateInviteV1(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	code := generateCode()
+	code := util.GenerateCode()
 	attempt := 0
 	for {
 		_, err = userService.GetInvite(code)
 		if err.Error() == "no invite found" {
 			break
 		}
-		code = generateCode()
+		code = util.GenerateCode()
 		attempt += 1
 		if attempt > 5 {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -67,16 +65,4 @@ func GetInvitesV1(w http.ResponseWriter, r *http.Request) {
 	invites := userService.GetInvites(offset)
 	data, _ := json.Marshal(invites)
 	_, _ = w.Write(data)
-}
-
-func generateCode() string {
-	l := make([]rune, 3)
-	n := make([]rune, 3)
-	for i := range l {
-		l[i] = letters[rand.Intn(len(letters))]
-	}
-	for i := range n {
-		n[i] = numbers[rand.Intn(len(numbers))]
-	}
-	return string(l) + "-" + string(n)
 }

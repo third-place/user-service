@@ -2,9 +2,9 @@ package repository
 
 import (
 	"errors"
-	"github.com/third-place/user-service/internal/entity"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
+	"github.com/third-place/user-service/internal/entity"
 )
 
 type UserRepository struct {
@@ -44,7 +44,7 @@ func (r *UserRepository) GetUserFromEmail(email string) (*entity.User, error) {
 
 func (r *UserRepository) GetUserFromSessionToken(token string) (*entity.User, error) {
 	user := &entity.User{}
-	r.conn.Where("last_access_token = ?", token).Find(&user)
+	r.conn.Where("jwt = ?", token).Find(&user)
 	if user.ID == 0 {
 		return nil, errors.New("user not found")
 	}

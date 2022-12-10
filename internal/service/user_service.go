@@ -3,14 +3,10 @@ package service
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
-	"github.com/lestrrat-go/jwx/jwk"
 	"github.com/third-place/user-service/internal/db"
 	"github.com/third-place/user-service/internal/entity"
 	kafka2 "github.com/third-place/user-service/internal/kafka"
@@ -19,25 +15,14 @@ import (
 	"github.com/third-place/user-service/internal/repository"
 	"github.com/third-place/user-service/internal/util"
 	"log"
-	"os"
 	"strings"
 )
 
 type UserService struct {
-	cognitoUserPool     string
-	cognitoClientID     string
-	cognitoClientSecret string
-	cognito             *cognitoidentityprovider.CognitoIdentityProvider
-	awsRegion           string
-	userRepository      *repository.UserRepository
-	inviteRepository    *repository.InviteRepository
-	kafkaWriter         *kafka.Producer
+	userRepository   *repository.UserRepository
+	inviteRepository *repository.InviteRepository
+	kafkaWriter      *kafka.Producer
 }
-
-const UserPasswordAuth = "USER_PASSWORD_AUTH"
-const AuthFlowRefreshToken = "REFRESH_TOKEN_AUTH"
-const AuthResponseChallenge = "NEW_PASSWORD_REQUIRED"
-const JwkTokenUrl = "https://cognito-idp.%s.amazonaws.com/%s/.well-known/jwks.json"
 
 var jwtKey = []byte("2022-12-09-Jv$aaiAQAXGNtbG&df3yJKTE!fdgWMWoTSAsxN%TZkVT^Dc%k9jThB6%G*XWQP6u")
 
@@ -55,19 +40,10 @@ func CreateUserService(
 	inviteRepository *repository.InviteRepository,
 	kafkaWriter *kafka.Producer,
 ) *UserService {
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-
 	return &UserService{
-		cognito:             cognitoidentityprovider.New(sess),
-		cognitoUserPool:     os.Getenv("USER_POOL_ID"),
-		cognitoClientID:     os.Getenv("COGNITO_CLIENT_ID"),
-		cognitoClientSecret: os.Getenv("COGNITO_CLIENT_SECRET"),
-		awsRegion:           os.Getenv("AWS_REGION"),
-		userRepository:      userRepository,
-		inviteRepository:    inviteRepository,
-		kafkaWriter:         kafkaWriter,
+		userRepository:   userRepository,
+		inviteRepository: inviteRepository,
+		kafkaWriter:      kafkaWriter,
 	}
 }
 
@@ -148,12 +124,10 @@ func (s *UserService) CreateUser(newUser *model.NewUser) (*model.User, error) {
 		}
 		return nil, errors.New("error creating user")
 	}
-	userEntity, err := s.userRepository.GetUserFromUsername(newUser.Username)
 	if err != nil {
 		log.Print("user not found :: ", err)
 		return nil, err
 	}
-	response, err := s.PublishToCognito(userEntity, newUser.Password)
 	if err != nil {
 		log.Print("error creating cognito user :: ", err)
 		s.userRepository.Delete(user)
@@ -161,7 +135,6 @@ func (s *UserService) CreateUser(newUser *model.NewUser) (*model.User, error) {
 	}
 	invite.Claimed = true
 	s.inviteRepository.Save(invite)
-	user.CognitoId = uuid.MustParse(*response.UserSub)
 	result = s.userRepository.Save(user)
 	if result.Error != nil {
 		log.Print("error updating user with cognito ID :: ", result.Error)
@@ -172,14 +145,6 @@ func (s *UserService) CreateUser(newUser *model.NewUser) (*model.User, error) {
 		log.Print("error publishing to kafka :: ", err)
 	}
 	return userModel, nil
-}
-
-func (s *UserService) PublishToCognito(user *entity.User, password string) (*cognitoidentityprovider.SignUpOutput, error) {
-	return s.cognito.SignUp(&cognitoidentityprovider.SignUpInput{
-		Username: aws.String(user.Email),
-		Password: aws.String(password),
-		ClientId: aws.String(s.cognitoClientID),
-	})
 }
 
 func (s *UserService) UpdateUser(userModel *model.User) error {
@@ -213,151 +178,29 @@ func (s *UserService) CreateSession(newSession *model.NewSession) (*AuthResponse
 			"email not found, do you need to sign up?",
 		)
 	}
-	response, err := s.cognito.InitiateAuth(&cognitoidentityprovider.InitiateAuthInput{
-		AuthFlow: aws.String(UserPasswordAuth),
-		AuthParameters: map[string]*string{
-			"USERNAME": aws.String(newSession.Email),
-			"PASSWORD": aws.String(newSession.Password),
-		},
-		ClientId: aws.String(s.cognitoClientID),
-	})
-
-	if err != nil {
-		log.Print("login failed", err.Error())
-		return nil, util.NewInputFieldError(
-			"password",
-			"login failed, do you need a password reset?",
-		)
+	if !util.CheckPasswordHash(newSession.Password, search.Password) {
+		return nil, errors.New("authentication failed")
 	}
-
-	if response.AuthenticationResult != nil {
-		log.Print("updating user tokens with response from AWS for user ID: ", search.ID, ", response: ", response.String())
-		err = s.updateJWT(search)
-		s.updateCognitoUserTokens(search, response.AuthenticationResult)
-		return createSessionResponse(search, response), err
-	}
-
-	s.updateUserWithCreateSessionResult(search, response)
-	log.Print("created session from AWS: ", response.String())
-	return createChallengeSessionResponse(search, response), nil
-}
-
-func (s *UserService) ProvideChallengeResponse(passwordReset *model.PasswordReset) *AuthResponse {
-	log.Print("provide challenge response :: ", passwordReset)
-	user, err := s.userRepository.GetUserFromEmail(passwordReset.Email)
-
-	if err != nil {
-		log.Print("user not found")
-		return createAuthFailedSessionResponse("user not found")
-	}
-
-	log.Print("requesting reset with: ", passwordReset.Email, ", session: ", user.LastSessionToken)
-
-	data := &cognitoidentityprovider.RespondToAuthChallengeInput{
-		ChallengeName: aws.String(AuthResponseChallenge),
-		ChallengeResponses: map[string]*string{
-			"USERNAME":     aws.String(passwordReset.Email),
-			"NEW_PASSWORD": aws.String(passwordReset.Password),
-		},
-		ClientId: aws.String(s.cognitoClientID),
-		Session:  aws.String(user.LastSessionToken),
-	}
-
-	response, err := s.cognito.RespondToAuthChallenge(data)
-
-	if err != nil {
-		log.Print("error responding to auth challenge: ", err)
-		return createAuthFailedSessionResponse("auth failed")
-	}
-
-	log.Print("response from provide challenge: ", response.String())
-
-	if response.AuthenticationResult != nil {
-		s.updateCognitoUserTokens(user, response.AuthenticationResult)
-	}
-
-	return createChallengeResponse(response)
+	err := s.updateJWT(search)
+	s.userRepository.Save(search)
+	return createSessionResponse(search), err
 }
 
 func (s *UserService) GetSession(sessionToken *model.SessionToken) (*model.Session, error) {
-	keySet, jwkErr := jwk.Fetch(fmt.Sprintf(JwkTokenUrl, s.awsRegion, s.cognitoUserPool))
-	if jwkErr != nil {
-		log.Print("error fetching jwk: ", jwkErr)
-		return nil, errors.New("jwk fetch error")
-	}
-
-	token, parseErr := jwt.Parse(sessionToken.Token, func(token *jwt.Token) (interface{}, error) {
-		kid, _ := token.Header["kid"].(string)
-		keys := keySet.LookupKeyID(kid)
-		if len(keys) > 0 {
-			return keys[0].Materialize()
-		}
-		log.Print("error finding user session")
-		return nil, errors.New("no session found")
-	})
-	if parseErr != nil {
-		log.Print("jwt parse error", parseErr)
-		return nil, parseErr
-	}
-
-	claims := token.Claims.(jwt.MapClaims)
-	if err := claims.Valid(); err != nil || claims.VerifyAudience(s.cognitoClientID, false) == false {
-		log.Print("token verification failed with: ", err)
-		return nil, errors.New("verification failed")
-	}
-
-	response, err := s.cognito.GetUser(&cognitoidentityprovider.GetUserInput{AccessToken: aws.String(sessionToken.Token)})
-	if err != nil {
-		log.Print("error retrieving user: ", err)
-		return nil, err
-	}
 	user, err := s.userRepository.GetUserFromSessionToken(sessionToken.Token)
 	if err != nil {
-		log.Print("user does not match jwt: ", response.String(), " and user: ", user)
-		return nil, errors.New("user does not match jwt")
+		return nil, err
 	}
 	return model.CreateSession(mapper.MapUserEntityToUser(user), sessionToken.Token), nil
 }
 
-func (s *UserService) RefreshSession(sessionRefresh *model.SessionRefresh) *AuthResponse {
-	log.Print("request refresh session :: ", sessionRefresh.Token)
-	user, err := s.userRepository.GetUserFromSessionToken(sessionRefresh.Token)
-
-	if err != nil {
-		log.Print("error finding user :: ", err)
-		return createAuthFailedSessionResponse("auth failed")
-	}
-
-	if user.LastRefreshToken == "" {
-		log.Print("no available refresh tokens")
-		return createAuthFailedSessionResponse("no available refresh tokens")
-	}
-
-	result, err := s.cognito.InitiateAuth(&cognitoidentityprovider.InitiateAuthInput{
-		AuthFlow: aws.String(AuthFlowRefreshToken),
-		AuthParameters: map[string]*string{
-			"REFRESH_TOKEN": aws.String(user.LastRefreshToken),
-			"DEVICE_KEY":    aws.String(user.DeviceKey),
-		},
-		ClientId: aws.String(s.cognitoClientID),
-	})
-
-	if err != nil {
-		log.Print("error refreshing user session :: ", err)
-		return createAuthFailedSessionResponse("auth failed")
-	}
-
-	s.updateCognitoUserTokens(user, result.AuthenticationResult)
-	return createSuccessfulRefreshResponse(result)
-}
-
 func (s *UserService) DeleteSession(sessionToken *model.SessionToken) error {
-	_, err := s.cognito.GlobalSignOut(&cognitoidentityprovider.GlobalSignOutInput{
-		AccessToken: &sessionToken.Token,
-	})
+	userEntity, err := s.userRepository.GetUserFromSessionToken(sessionToken.Token)
 	if err != nil {
-		return errors.New("something failed")
+		return err
 	}
+	userEntity.JWT = ""
+	s.userRepository.Save(userEntity)
 	return nil
 }
 
@@ -382,39 +225,56 @@ func (s *UserService) UnbanUser(sessionUser *entity.User, userEntity *entity.Use
 }
 
 func (s *UserService) SubmitOTP(otp *model.Otp) error {
-	_, err := s.cognito.ConfirmSignUp(&cognitoidentityprovider.ConfirmSignUpInput{
-		ConfirmationCode: aws.String(otp.Code),
-		Username:         aws.String(otp.User.Username),
-		ClientId:         aws.String(s.cognitoClientID),
-	})
+	userEntity, err := s.userRepository.GetUserFromEmail(otp.User.Email)
 	if err != nil {
-		log.Print("err with OTP :: ", err.Error())
+		return err
 	}
-	return err
+	if userEntity.OTP != otp.Code {
+		return errors.New("code mismatch")
+	}
+	userEntity.Verified = true
+	s.userRepository.Save(userEntity)
+	return nil
 }
 
 func (s *UserService) ForgotPassword(user *model.User) error {
-	_, err := s.cognito.ForgotPassword(&cognitoidentityprovider.ForgotPasswordInput{
-		Username: aws.String(user.Username),
-		ClientId: aws.String(s.cognitoClientID),
-	})
+	userEntity, err := s.userRepository.GetUserFromEmail(user.Email)
 	if err != nil {
-		log.Print("err with forgot password :: ", err.Error())
+		return err
 	}
-	return err
+	userEntity.OTP = util.GenerateCode()
+	s.userRepository.Save(userEntity)
+	return nil
 }
 
 func (s *UserService) ConfirmForgotPassword(otp *model.Otp) error {
-	_, err := s.cognito.ConfirmForgotPassword(&cognitoidentityprovider.ConfirmForgotPasswordInput{
-		Username:         aws.String(otp.User.Username),
-		Password:         aws.String(otp.User.Password),
-		ClientId:         aws.String(s.cognitoClientID),
-		ConfirmationCode: aws.String(otp.Code),
-	})
+	userEntity, err := s.userRepository.GetUserFromEmail(otp.User.Email)
 	if err != nil {
-		log.Print("err with forgot password :: ", err.Error())
+		return err
 	}
-	return err
+	if userEntity.OTP != otp.Code {
+		return errors.New("validation failed")
+	}
+	minSize, digit, special, lowercase, uppercase := util.ValidatePassword(otp.User.Password)
+	if !minSize {
+		return errors.New("password too short")
+	}
+	if !digit {
+		return errors.New("password needs a number")
+	}
+	if !special {
+		return errors.New("password needs a special character")
+	}
+	if !lowercase {
+		return errors.New("password needs a lowercase letter")
+	}
+	if !uppercase {
+		return errors.New("password needs an uppercase letter")
+	}
+	userEntity.Password, _ = util.HashPassword(otp.User.Password)
+	userEntity.Verified = true
+	s.userRepository.Save(userEntity)
+	return nil
 }
 
 func (s *UserService) GetInvites(offset int) []*model.Invite {

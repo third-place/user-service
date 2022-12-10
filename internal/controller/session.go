@@ -27,18 +27,6 @@ func CreateSessionV1(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(data)
 }
 
-// RespondToChallengeV1 - Respond to an authentication challenge with a password reset
-func RespondToChallengeV1(w http.ResponseWriter, r *http.Request) {
-	passwordResetModel, err := model.DecodeRequestToPasswordReset(r)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	result := service.CreateDefaultUserService().ProvideChallengeResponse(passwordResetModel)
-	data, _ := json.Marshal(result)
-	_, _ = w.Write(data)
-}
-
 // GetSessionV1 - validate a session token
 func GetSessionV1(w http.ResponseWriter, r *http.Request) {
 	sessionToken := model.DecodeRequestToSessionToken(r)
@@ -51,13 +39,6 @@ func GetSessionV1(w http.ResponseWriter, r *http.Request) {
 	}
 	data, _ := json.Marshal(session)
 	_, _ = w.Write(data)
-}
-
-// RefreshSessionV1 - refresh a session token
-func RefreshSessionV1(w http.ResponseWriter, r *http.Request) {
-	sessionToken := model.DecodeRequestToSessionRefresh(r)
-	response := service.CreateDefaultUserService().RefreshSession(sessionToken)
-	_, _ = w.Write(response.ToJson())
 }
 
 // DeleteSessionV1 - Delete a user's session (log out)

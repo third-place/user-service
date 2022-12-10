@@ -121,13 +121,6 @@ var routes = Routes{
 	},
 
 	{
-		"RespondToChallenge",
-		strings.ToUpper("Put"),
-		"/session",
-		controller.RespondToChallengeV1,
-	},
-
-	{
 		"SubmitForgotPassword",
 		strings.ToUpper("Post"),
 		"/forgot-password",
@@ -146,13 +139,6 @@ var routes = Routes{
 		strings.ToUpper("Get"),
 		"/session",
 		controller.GetSessionV1,
-	},
-
-	{
-		"RefreshSession",
-		strings.ToUpper("Patch"),
-		"/session",
-		controller.RefreshSessionV1,
 	},
 
 	{
