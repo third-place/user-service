@@ -39,6 +39,8 @@ const AuthFlowRefreshToken = "REFRESH_TOKEN_AUTH"
 const AuthResponseChallenge = "NEW_PASSWORD_REQUIRED"
 const JwkTokenUrl = "https://cognito-idp.%s.amazonaws.com/%s/.well-known/jwks.json"
 
+var jwtKey = []byte("2022-12-09-Jv$aaiAQAXGNtbG&df3yJKTE!fdgWMWoTSAsxN%TZkVT^Dc%k9jThB6%G*XWQP6u")
+
 func CreateDefaultUserService() *UserService {
 	conn := db.CreateDefaultConnection()
 	return CreateUserService(
@@ -230,8 +232,9 @@ func (s *UserService) CreateSession(newSession *model.NewSession) (*AuthResponse
 
 	if response.AuthenticationResult != nil {
 		log.Print("updating user tokens with response from AWS for user ID: ", search.ID, ", response: ", response.String())
-		s.updateUserTokens(search, response.AuthenticationResult)
-		return createSessionResponse(search, response), nil
+		err = s.updateJWT(search)
+		s.updateCognitoUserTokens(search, response.AuthenticationResult)
+		return createSessionResponse(search, response), err
 	}
 
 	s.updateUserWithCreateSessionResult(search, response)
@@ -270,7 +273,7 @@ func (s *UserService) ProvideChallengeResponse(passwordReset *model.PasswordRese
 	log.Print("response from provide challenge: ", response.String())
 
 	if response.AuthenticationResult != nil {
-		s.updateUserTokens(user, response.AuthenticationResult)
+		s.updateCognitoUserTokens(user, response.AuthenticationResult)
 	}
 
 	return createChallengeResponse(response)
@@ -344,7 +347,7 @@ func (s *UserService) RefreshSession(sessionRefresh *model.SessionRefresh) *Auth
 		return createAuthFailedSessionResponse("auth failed")
 	}
 
-	s.updateUserTokens(user, result.AuthenticationResult)
+	s.updateCognitoUserTokens(user, result.AuthenticationResult)
 	return createSuccessfulRefreshResponse(result)
 }
 
@@ -470,7 +473,18 @@ func (s *UserService) updateUserWithCreateSessionResult(user *entity.User, resul
 	s.userRepository.Save(user)
 }
 
-func (s *UserService) updateUserTokens(user *entity.User, result *cognitoidentityprovider.AuthenticationResultType) {
+func (s *UserService) updateJWT(user *entity.User) error {
+	claims := model.NewClaims(user.Uuid)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(jwtKey)
+	if err != nil {
+		return err
+	}
+	user.JWT = tokenString
+	return nil
+}
+
+func (s *UserService) updateCognitoUserTokens(user *entity.User, result *cognitoidentityprovider.AuthenticationResultType) {
 	if result.NewDeviceMetadata != nil {
 		user.DeviceGroupKey = *result.NewDeviceMetadata.DeviceGroupKey
 		user.DeviceKey = *result.NewDeviceMetadata.DeviceKey

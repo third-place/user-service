@@ -15,6 +15,7 @@ require (
 )
 
 require (
+	github.com/golang-jwt/jwt/v4 v4.4.3 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af // indirect
 	github.com/lib/pq v1.1.1 // indirect

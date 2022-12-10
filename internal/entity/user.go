@@ -32,6 +32,7 @@ type User struct {
 	Birthday         string
 	Verified         bool `gorm:"not null"`
 	InviteID         uint
+	JWT              string
 	Emails           []*Email
 	Passwords        []*Password
 }
