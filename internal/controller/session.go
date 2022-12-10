@@ -40,3 +40,17 @@ func GetSessionV1(w http.ResponseWriter, r *http.Request) {
 	data, _ := json.Marshal(session)
 	_, _ = w.Write(data)
 }
+
+// RefreshSessionV1 - refresh a session token
+func RefreshSessionV1(w http.ResponseWriter, r *http.Request) {
+	sessionToken := model.DecodeRequestToSessionToken(r)
+	session, err := service.CreateDefaultUserService().RefreshSession(sessionToken)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Print("sanity: ", sessionToken.Token)
+		log.Print(err)
+		return
+	}
+	data, _ := json.Marshal(session)
+	_, _ = w.Write(data)
+}

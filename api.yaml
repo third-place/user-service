@@ -86,29 +86,13 @@ paths:
           description: |-
             403 response
     put:
-      operationId: respondToChallenge
-      summary: Respond to an authentication challenge
-      requestBody:
-        description: authentication to use in response
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/NewSession"
-      responses:
-        '200':
-          description: |-
-            200 response
-    patch:
-      operationId: updateUserSession
-      summary: Update a user's session
-      requestBody:
-        description: session to update
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SessionRefresh"
+      operationId: refreshSessionV1
+      summary: Refresh a user's session
+      parameters:
+        - in: query
+          name: token
+          schema:
+            type: string
       responses:
         '200':
           description: |-
@@ -183,32 +167,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Invite'
-  /group:
-    get:
-      operationId: getGroupV1
-      summary: get a group
-      responses:
-        '200':
-          description: |-
-            200 response
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Group"
-    post:
-      operationId: createGroupV1
-      summary: create a group
-      requestBody:
-        description: group to create
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/NewGroup"
-      responses:
-        '201':
-          description: |-
-            201 response
   /ban/{username}:
     post:
       operationId: banUserV1
@@ -335,13 +293,6 @@ components:
           type: string
           format: email
         password:
-          type: string
-    SessionRefresh:
-      type: object
-      required:
-        - token
-      properties:
-        token:
           type: string
     Invite:
       type: object
