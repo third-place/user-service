@@ -113,17 +113,6 @@ paths:
         '200':
           description: |-
             200 response
-    delete:
-      operationId: deleteSessionV1
-      summary: Delete a user's session (log out)
-      parameters:
-        - in: query
-          name: token
-          schema:
-            type: string
-      responses:
-        '200':
-          description: 200 response
   /otp:
     post:
       operationId: submitOTPV1

@@ -209,16 +209,6 @@ func (s *UserService) GetSession(sessionToken *model.SessionToken) (*model.Sessi
 	return model.CreateSession(mapper.MapUserEntityToUser(user), sessionToken.Token), nil
 }
 
-func (s *UserService) DeleteSession(sessionToken *model.SessionToken) error {
-	userEntity, err := s.userRepository.GetUserFromSessionToken(sessionToken.Token)
-	if err != nil {
-		return err
-	}
-	userEntity.JWT = ""
-	s.userRepository.Save(userEntity)
-	return nil
-}
-
 func (s *UserService) BanUser(sessionUser *entity.User, userEntity *entity.User) error {
 	if !s.canAdminister(sessionUser, userEntity) {
 		return errors.New("cannot ban user")

@@ -40,13 +40,3 @@ func GetSessionV1(w http.ResponseWriter, r *http.Request) {
 	data, _ := json.Marshal(session)
 	_, _ = w.Write(data)
 }
-
-// DeleteSessionV1 - Delete a user's session (log out)
-func DeleteSessionV1(w http.ResponseWriter, r *http.Request) {
-	sessionToken := model.DecodeRequestToSessionToken(r)
-	err := service.CreateDefaultUserService().DeleteSession(sessionToken)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-}
