@@ -19,7 +19,7 @@ var letters = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 // CreateInviteV1 -- create new invites for new users
 func CreateInviteV1(w http.ResponseWriter, r *http.Request) {
-	userService := service.CreateUserService()
+	userService := service.CreateDefaultUserService()
 	sessionToken := getSessionToken(r)
 	sessionModel := &model.SessionToken{
 		Token: sessionToken,
@@ -63,7 +63,7 @@ func GetInvitesV1(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	userService := service.CreateUserService()
+	userService := service.CreateDefaultUserService()
 	invites := userService.GetInvites(offset)
 	data, _ := json.Marshal(invites)
 	_, _ = w.Write(data)

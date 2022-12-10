@@ -11,7 +11,7 @@ import (
 // CreateSessionV1 - Create a new session
 func CreateSessionV1(w http.ResponseWriter, r *http.Request) {
 	newSessionModel := model.DecodeRequestToNewSession(r)
-	result, err := service.CreateUserService().CreateSession(newSessionModel)
+	result, err := service.CreateDefaultUserService().CreateSession(newSessionModel)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		data, _ := json.Marshal(err)
@@ -30,7 +30,7 @@ func RespondToChallengeV1(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	result := service.CreateUserService().ProvideChallengeResponse(passwordResetModel)
+	result := service.CreateDefaultUserService().ProvideChallengeResponse(passwordResetModel)
 	data, _ := json.Marshal(result)
 	_, _ = w.Write(data)
 }
@@ -38,7 +38,7 @@ func RespondToChallengeV1(w http.ResponseWriter, r *http.Request) {
 // GetSessionV1 - validate a session token
 func GetSessionV1(w http.ResponseWriter, r *http.Request) {
 	sessionToken := model.DecodeRequestToSessionToken(r)
-	session, err := service.CreateUserService().GetSession(sessionToken)
+	session, err := service.CreateDefaultUserService().GetSession(sessionToken)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		log.Print("sanity: ", sessionToken.Token)
@@ -52,14 +52,14 @@ func GetSessionV1(w http.ResponseWriter, r *http.Request) {
 // RefreshSessionV1 - refresh a session token
 func RefreshSessionV1(w http.ResponseWriter, r *http.Request) {
 	sessionToken := model.DecodeRequestToSessionRefresh(r)
-	response := service.CreateUserService().RefreshSession(sessionToken)
+	response := service.CreateDefaultUserService().RefreshSession(sessionToken)
 	_, _ = w.Write(response.ToJson())
 }
 
 // DeleteSessionV1 - Delete a user's session (log out)
 func DeleteSessionV1(w http.ResponseWriter, r *http.Request) {
 	sessionToken := model.DecodeRequestToSessionToken(r)
-	err := service.CreateUserService().DeleteSession(sessionToken)
+	err := service.CreateDefaultUserService().DeleteSession(sessionToken)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
