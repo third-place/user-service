@@ -3,7 +3,6 @@ package service
 import (
 	"encoding/json"
 	"errors"
-	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
@@ -181,13 +180,29 @@ func (s *UserService) CreateSession(newSession *model.NewSession) (*AuthResponse
 	if !util.CheckPasswordHash(newSession.Password, search.Password) {
 		return nil, errors.New("authentication failed")
 	}
-	err := s.updateJWT(search)
-	s.userRepository.Save(search)
-	return createSessionResponse(search), err
+	token, err := s.getJWT(search)
+	if err != nil {
+		return nil, err
+	}
+	return createSessionResponse(search, token), nil
 }
 
 func (s *UserService) GetSession(sessionToken *model.SessionToken) (*model.Session, error) {
-	user, err := s.userRepository.GetUserFromSessionToken(sessionToken.Token)
+	claims := &model.Claims{}
+	token, err := jwt.ParseWithClaims(sessionToken.Token, claims, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if !token.Valid {
+		return nil, errors.New("token not valid")
+	}
+	userUuid, err := uuid.Parse(claims.UserUuid)
+	if err != nil {
+		return nil, err
+	}
+	user, err := s.userRepository.GetUserFromUuid(userUuid)
 	if err != nil {
 		return nil, err
 	}
@@ -327,32 +342,12 @@ func (s *UserService) canAdminister(sessionUser *entity.User, user *entity.User)
 	return true
 }
 
-func (s *UserService) updateUserWithCreateSessionResult(user *entity.User, result *cognitoidentityprovider.InitiateAuthOutput) {
-	user.SRP = *result.ChallengeParameters["USER_ID_FOR_SRP"]
-	user.LastSessionToken = *result.Session
-	s.userRepository.Save(user)
-}
-
-func (s *UserService) updateJWT(user *entity.User) error {
+func (s *UserService) getJWT(user *entity.User) (string, error) {
 	claims := model.NewClaims(user.Uuid)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
-		return err
+		return "", err
 	}
-	user.JWT = tokenString
-	return nil
-}
-
-func (s *UserService) updateCognitoUserTokens(user *entity.User, result *cognitoidentityprovider.AuthenticationResultType) {
-	if result.NewDeviceMetadata != nil {
-		user.DeviceGroupKey = *result.NewDeviceMetadata.DeviceGroupKey
-		user.DeviceKey = *result.NewDeviceMetadata.DeviceKey
-	}
-	user.LastAccessToken = *result.AccessToken
-	user.LastIdToken = *result.IdToken
-	if result.RefreshToken != nil {
-		user.LastRefreshToken = *result.RefreshToken
-	}
-	s.userRepository.Save(user)
+	return tokenString, nil
 }
