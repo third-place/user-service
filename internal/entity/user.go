@@ -2,9 +2,9 @@ package entity
 
 import (
 	"encoding/json"
-	"github.com/third-place/user-service/internal/model"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
+	"github.com/third-place/user-service/internal/model"
 )
 
 type User struct {
@@ -27,8 +27,9 @@ type User struct {
 	AddressStreet    string
 	AddressCity      string
 	AddressZip       string
-	CurrentEmail     string `gorm:"unique;not null"`
-	CurrentPassword  string `gorm:"not null"`
+	Email            string `gorm:"unique;not null"`
+	Password         string `gorm:"not null"`
+	OTP              string
 	Birthday         string
 	Verified         bool `gorm:"not null"`
 	InviteID         uint

@@ -15,9 +15,8 @@ type Session struct {
 	Token string `json:"token,omitempty"`
 }
 
-func CreateSession(user *User, token string) *Session {
+func CreateSession(user *User) *Session {
 	return &Session{
-		User:  user,
-		Token: token,
+		User: user,
 	}
 }

@@ -15,7 +15,7 @@ import (
 // CreateNewUserV1 - Create a new user
 func CreateNewUserV1(w http.ResponseWriter, r *http.Request) {
 	newUserModel := model.DecodeRequestToNewUser(r)
-	user, err := service.CreateUserService().CreateUser(newUserModel)
+	user, err := service.CreateUserService(r.Context()).CreateUser(newUserModel)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		if _, ok := err.(*util.InputFieldError); ok {
@@ -37,7 +37,7 @@ func GetUserByUsernameV1(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	username := params["username"]
 
-	user, err := service.CreateUserService().GetUserFromUsername(username)
+	user, err := service.CreateUserService(r.Context()).GetUserFromUsername(username)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -55,12 +55,8 @@ func UpdateUserV1(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	userService := service.CreateUserService()
-	sessionToken := getSessionToken(r)
-	sessionModel := &model.SessionToken{
-		Token: sessionToken,
-	}
-	session, err := userService.GetSession(sessionModel)
+	userService := service.CreateUserService(r.Context())
+	session, err := userService.GetSession()
 	if err != nil || session.User.Uuid != userModel.Uuid {
 		w.WriteHeader(http.StatusForbidden)
 		return
@@ -79,13 +75,9 @@ func UpdateUserV1(w http.ResponseWriter, r *http.Request) {
 func BanUserV1(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	usernameParam := params["username"]
-	userService := service.CreateUserService()
+	userService := service.CreateUserService(r.Context())
 	userRepository := repository.CreateUserRepository(db.CreateDefaultConnection())
-	sessionToken := getSessionToken(r)
-	sessionModel := &model.SessionToken{
-		Token: sessionToken,
-	}
-	session, err := userService.GetSession(sessionModel)
+	session, err := userService.GetSession()
 	if err != nil {
 		log.Print("error 0 :: ", err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -115,13 +107,9 @@ func BanUserV1(w http.ResponseWriter, r *http.Request) {
 func UnbanUserV1(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	usernameParam := params["username"]
-	userService := service.CreateUserService()
+	userService := service.CreateUserService(r.Context())
 	userRepository := repository.CreateUserRepository(db.CreateDefaultConnection())
-	sessionToken := getSessionToken(r)
-	sessionModel := &model.SessionToken{
-		Token: sessionToken,
-	}
-	session, err := userService.GetSession(sessionModel)
+	session, err := userService.GetSession()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -145,7 +133,7 @@ func UnbanUserV1(w http.ResponseWriter, r *http.Request) {
 // SubmitOTPV1 - Submit a new OTP
 func SubmitOTPV1(w http.ResponseWriter, r *http.Request) {
 	otpModel := model.DecodeRequestToOtp(r)
-	userService := service.CreateUserService()
+	userService := service.CreateUserService(r.Context())
 	err := userService.SubmitOTP(otpModel)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -159,7 +147,7 @@ func SubmitForgotPasswordV1(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	userService := service.CreateUserService()
+	userService := service.CreateUserService(r.Context())
 	err = userService.ForgotPassword(userModel)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -169,13 +157,10 @@ func SubmitForgotPasswordV1(w http.ResponseWriter, r *http.Request) {
 // ConfirmForgotPasswordV1 - Submit a forgot password request
 func ConfirmForgotPasswordV1(w http.ResponseWriter, r *http.Request) {
 	otpModel := model.DecodeRequestToOtp(r)
-	userService := service.CreateUserService()
+	userService := service.CreateUserService(r.Context())
 	err := userService.ConfirmForgotPassword(otpModel)
 	if err != nil {
+		log.Print(err)
 		w.WriteHeader(http.StatusBadRequest)
 	}
-}
-
-func getSessionToken(r *http.Request) string {
-	return r.Header.Get("x-session-token")
 }

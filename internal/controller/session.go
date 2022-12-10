@@ -10,8 +10,12 @@ import (
 
 // CreateSessionV1 - Create a new session
 func CreateSessionV1(w http.ResponseWriter, r *http.Request) {
-	newSessionModel := model.DecodeRequestToNewSession(r)
-	result, err := service.CreateUserService().CreateSession(newSessionModel)
+	newSessionModel, err := model.DecodeRequestToNewSession(r)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	result, err := service.CreateUserService(r.Context()).CreateSession(newSessionModel)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		data, _ := json.Marshal(err)
@@ -23,25 +27,11 @@ func CreateSessionV1(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(data)
 }
 
-// RespondToChallengeV1 - Respond to an authentication challenge with a password reset
-func RespondToChallengeV1(w http.ResponseWriter, r *http.Request) {
-	passwordResetModel, err := model.DecodeRequestToPasswordReset(r)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	result := service.CreateUserService().ProvideChallengeResponse(passwordResetModel)
-	data, _ := json.Marshal(result)
-	_, _ = w.Write(data)
-}
-
 // GetSessionV1 - validate a session token
 func GetSessionV1(w http.ResponseWriter, r *http.Request) {
-	sessionToken := model.DecodeRequestToSessionToken(r)
-	session, err := service.CreateUserService().GetSession(sessionToken)
+	session, err := service.CreateUserService(r.Context()).GetSession()
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		log.Print("sanity: ", sessionToken.Token)
 		log.Print(err)
 		return
 	}
@@ -49,17 +39,9 @@ func GetSessionV1(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(data)
 }
 
-// RefreshSessionV1 - refresh a session token
-func RefreshSessionV1(w http.ResponseWriter, r *http.Request) {
-	sessionToken := model.DecodeRequestToSessionRefresh(r)
-	response := service.CreateUserService().RefreshSession(sessionToken)
-	_, _ = w.Write(response.ToJson())
-}
-
 // DeleteSessionV1 - Delete a user's session (log out)
 func DeleteSessionV1(w http.ResponseWriter, r *http.Request) {
-	sessionToken := model.DecodeRequestToSessionToken(r)
-	err := service.CreateUserService().DeleteSession(sessionToken)
+	err := service.CreateUserService(r.Context()).DeleteSession()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
