@@ -23,7 +23,7 @@ func main() {
 		log.Print(err)
 		return
 	}
-	log.Printf("signing up with username :: %s, password :: %s", user.CurrentEmail, password)
+	log.Printf("signing up with username :: %s, password :: %s", user.Email, password)
 	response, err := userService.PublishToCognito(user, password)
 	if err != nil {
 		log.Print("error :: ", err)

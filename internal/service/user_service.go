@@ -174,7 +174,7 @@ func (s *UserService) CreateUser(newUser *model.NewUser) (*model.User, error) {
 
 func (s *UserService) PublishToCognito(user *entity.User, password string) (*cognitoidentityprovider.SignUpOutput, error) {
 	return s.cognito.SignUp(&cognitoidentityprovider.SignUpInput{
-		Username: aws.String(user.CurrentEmail),
+		Username: aws.String(user.Email),
 		Password: aws.String(password),
 		ClientId: aws.String(s.cognitoClientID),
 	})
