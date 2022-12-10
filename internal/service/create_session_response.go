@@ -5,9 +5,9 @@ import (
 	"github.com/third-place/user-service/internal/mapper"
 )
 
-func createSessionResponse(user *entity.User) *AuthResponse {
+func createSessionResponse(user *entity.User, token string) *AuthResponse {
 	return &AuthResponse{
-		Token: &user.JWT,
+		Token: token,
 		User:  mapper.MapUserEntityToUser(user),
 	}
 }
