@@ -103,9 +103,15 @@ spec:
                 secretKeyRef:
                   name: kafka
                   key: sasl_password
+            - name: JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: user-service
+                  key: jwt_key
       imagePullSecrets:
         - name: dockerconfigjson-github-com
         - name: postgres-user
         - name: cognito
         - name: aws
         - name: kafka
+        - name: user-service

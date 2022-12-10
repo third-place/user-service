@@ -14,6 +14,7 @@ import (
 	"github.com/third-place/user-service/internal/repository"
 	"github.com/third-place/user-service/internal/util"
 	"log"
+	"os"
 	"strings"
 	"time"
 )
@@ -24,7 +25,7 @@ type UserService struct {
 	kafkaWriter      *kafka.Producer
 }
 
-var jwtKey = []byte("2022-12-09-Jv$aaiAQAXGNtbG&df3yJKTE!fdgWMWoTSAsxN%TZkVT^Dc%k9jThB6%G*XWQP6u")
+var jwtKey = []byte(os.Getenv("JWT_KEY"))
 
 func CreateDefaultUserService() *UserService {
 	conn := db.CreateDefaultConnection()
