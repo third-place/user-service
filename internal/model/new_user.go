@@ -26,12 +26,12 @@ type NewUser struct {
 	InviteCode string `json:"invite_code"`
 }
 
-func DecodeRequestToNewUser(r *http.Request) *NewUser {
+func DecodeRequestToNewUser(r *http.Request) (*NewUser, error) {
 	decoder := json.NewDecoder(r.Body)
 	var data *NewUser
 	err := decoder.Decode(&data)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return data
+	return data, nil
 }

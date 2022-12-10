@@ -10,7 +10,11 @@ import (
 
 // CreateSessionV1 - Create a new session
 func CreateSessionV1(w http.ResponseWriter, r *http.Request) {
-	newSessionModel := model.DecodeRequestToNewSession(r)
+	newSessionModel, err := model.DecodeRequestToNewSession(r)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	result, err := service.CreateDefaultUserService().CreateSession(newSessionModel)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

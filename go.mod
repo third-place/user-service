@@ -15,13 +15,10 @@ require (
 )
 
 require (
-	github.com/alexedwards/scs v1.4.1 // indirect
-	github.com/alexedwards/scs/v2 v2.5.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af // indirect
 	github.com/lib/pq v1.1.1 // indirect
 	github.com/pkg/errors v0.8.0 // indirect
 	github.com/stretchr/testify v1.3.0 // indirect
 	golang.org/x/crypto v0.4.0 // indirect
-	golang.org/x/sys v0.3.0 // indirect
 )

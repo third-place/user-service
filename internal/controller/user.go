@@ -14,7 +14,11 @@ import (
 
 // CreateNewUserV1 - Create a new user
 func CreateNewUserV1(w http.ResponseWriter, r *http.Request) {
-	newUserModel := model.DecodeRequestToNewUser(r)
+	newUserModel, err := model.DecodeRequestToNewUser(r)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	user, err := service.CreateDefaultUserService().CreateUser(newUserModel)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -144,9 +148,13 @@ func UnbanUserV1(w http.ResponseWriter, r *http.Request) {
 
 // SubmitOTPV1 - Submit a new OTP
 func SubmitOTPV1(w http.ResponseWriter, r *http.Request) {
-	otpModel := model.DecodeRequestToOtp(r)
+	otpModel, err := model.DecodeRequestToOtp(r)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	userService := service.CreateDefaultUserService()
-	err := userService.SubmitOTP(otpModel)
+	err = userService.SubmitOTP(otpModel)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
@@ -168,9 +176,13 @@ func SubmitForgotPasswordV1(w http.ResponseWriter, r *http.Request) {
 
 // ConfirmForgotPasswordV1 - Submit a forgot password request
 func ConfirmForgotPasswordV1(w http.ResponseWriter, r *http.Request) {
-	otpModel := model.DecodeRequestToOtp(r)
+	otpModel, err := model.DecodeRequestToOtp(r)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	userService := service.CreateDefaultUserService()
-	err := userService.ConfirmForgotPassword(otpModel)
+	err = userService.ConfirmForgotPassword(otpModel)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}

@@ -20,12 +20,12 @@ type Otp struct {
 	Code string `json:"code,omitempty"`
 }
 
-func DecodeRequestToOtp(r *http.Request) *Otp {
+func DecodeRequestToOtp(r *http.Request) (*Otp, error) {
 	decoder := json.NewDecoder(r.Body)
 	var data *Otp
 	err := decoder.Decode(&data)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return data
+	return data, nil
 }
