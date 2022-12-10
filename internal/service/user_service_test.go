@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/third-place/user-service/internal/model"
 	"github.com/joho/godotenv"
+	"github.com/third-place/user-service/internal/model"
 	"math/rand"
 	"os"
 	"strconv"
@@ -66,25 +66,5 @@ func Test_CreateFirstSession_WillReceiveChallenge(t *testing.T) {
 	})
 	if response == nil || response.AuthResponse != ChallengeNewPassword {
 		t.Error("expected challenge")
-	}
-}
-
-func Test_AuthFlow_FromStart_ToVerifiedUser(t *testing.T) {
-	svc := CreateDefaultUserService()
-	email := GetEmailAddress()
-	_, _ = svc.CreateUser(&model.NewUser{
-		Email:    email,
-		Password: dummyPassword,
-	})
-	svc.CreateSession(&model.NewSession{
-		Email:    email,
-		Password: dummyPassword,
-	})
-	response := svc.ProvideChallengeResponse(&model.PasswordReset{
-		Email:    email,
-		Password: "my-awesome-new-pAssword-123!",
-	})
-	if response == nil || response.AuthResponse != SessionAuthenticated {
-		t.Error("authflow")
 	}
 }
