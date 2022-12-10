@@ -15,16 +15,16 @@ import (
 )
 
 type NewSession struct {
-	Email    string `json:"email"`
+	Email string `json:"email"`
 	Password string `json:"password"`
 }
 
-func DecodeRequestToNewSession(r *http.Request) (*NewSession, error) {
+func DecodeRequestToNewSession(r *http.Request) *NewSession {
 	decoder := json.NewDecoder(r.Body)
 	var data *NewSession
 	err := decoder.Decode(&data)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
-	return data, nil
+	return data
 }

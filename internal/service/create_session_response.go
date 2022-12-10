@@ -2,15 +2,32 @@ package service
 
 import (
 	"encoding/json"
+	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
 	"github.com/third-place/user-service/internal/entity"
 	"github.com/third-place/user-service/internal/mapper"
 )
 
 const challengeNewPasswordString = "ChallengeNewPassword"
 
-func createSessionResponse(user *entity.User) *AuthResponse {
+func getAuthResponseFromChallenge(response string) AuthResponseType {
+	if response == AuthResponseChallenge {
+		return ChallengeNewPassword
+	}
+	return Unknown
+}
+
+func createSessionResponse(user *entity.User, response *cognitoidentityprovider.InitiateAuthOutput) *AuthResponse {
 	return &AuthResponse{
-		User: mapper.MapUserEntityToUser(user),
+		Token: response.AuthenticationResult.AccessToken,
+		User:  mapper.MapUserEntityToUser(user),
+	}
+}
+
+func createChallengeSessionResponse(user *entity.User, response *cognitoidentityprovider.InitiateAuthOutput) *AuthResponse {
+	return &AuthResponse{
+		AuthResponse: getAuthResponseFromChallenge(*response.ChallengeName),
+		Token:        response.Session,
+		User:         mapper.MapUserEntityToUser(user),
 	}
 }
 

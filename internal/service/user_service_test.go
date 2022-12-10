@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"github.com/joho/godotenv"
 	"github.com/third-place/user-service/internal/model"
 	"math/rand"
@@ -28,7 +27,7 @@ func GetEmailAddress() string {
 }
 
 func Test_CreateNewUser_SanityCheck(t *testing.T) {
-	user, err := CreateUserService(context.Background()).CreateUser(&model.NewUser{
+	user, err := CreateUserService().CreateUser(&model.NewUser{
 		Name:     "foo",
 		Email:    GetEmailAddress(),
 		Password: dummyPassword,
@@ -40,7 +39,7 @@ func Test_CreateNewUser_SanityCheck(t *testing.T) {
 }
 
 func Test_RegisteringWith_DuplicateEmails_Error(t *testing.T) {
-	svc := CreateUserService(context.Background())
+	svc := CreateUserService()
 	userModel := &model.NewUser{
 		Name:     "foo",
 		Email:    GetEmailAddress(),
@@ -55,7 +54,7 @@ func Test_RegisteringWith_DuplicateEmails_Error(t *testing.T) {
 }
 
 func Test_CreateFirstSession_WillReceiveChallenge(t *testing.T) {
-	svc := CreateUserService(context.Background())
+	svc := CreateUserService()
 	email := GetEmailAddress()
 	_, _ = svc.CreateUser(&model.NewUser{
 		Email:    email,
@@ -67,5 +66,25 @@ func Test_CreateFirstSession_WillReceiveChallenge(t *testing.T) {
 	})
 	if response == nil || response.AuthResponse != ChallengeNewPassword {
 		t.Error("expected challenge")
+	}
+}
+
+func Test_AuthFlow_FromStart_ToVerifiedUser(t *testing.T) {
+	svc := CreateUserService()
+	email := GetEmailAddress()
+	_, _ = svc.CreateUser(&model.NewUser{
+		Email:    email,
+		Password: dummyPassword,
+	})
+	svc.CreateSession(&model.NewSession{
+		Email:    email,
+		Password: dummyPassword,
+	})
+	response := svc.ProvideChallengeResponse(&model.PasswordReset{
+		Email:    email,
+		Password: "my-awesome-new-pAssword-123!",
+	})
+	if response == nil || response.AuthResponse != SessionAuthenticated {
+		t.Error("authflow")
 	}
 }

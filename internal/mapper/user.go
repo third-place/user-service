@@ -3,7 +3,6 @@ package mapper
 import (
 	"github.com/third-place/user-service/internal/entity"
 	"github.com/third-place/user-service/internal/model"
-	"github.com/third-place/user-service/internal/util"
 )
 
 func MapUserEntityToModel(user *entity.User) *model.User {
@@ -11,8 +10,8 @@ func MapUserEntityToModel(user *entity.User) *model.User {
 		Uuid:          user.Uuid.String(),
 		Name:          user.Name,
 		Username:      user.Username,
-		Email:         user.Email,
-		Password:      user.Password,
+		Email:         user.CurrentEmail,
+		Password:      user.CurrentPassword,
 		ProfilePic:    user.ProfilePic,
 		Role:          model.Role(user.Role),
 		IsBanned:      user.IsBanned,
@@ -44,11 +43,9 @@ func MapUserEntityToUser(user *entity.User) *model.User {
 }
 
 func MapNewUserModelToEntity(user *model.NewUser) *entity.User {
-	pass, _ := util.HashPassword(user.Password)
 	return &entity.User{
-		Name:     user.Name,
-		Username: user.Username,
-		Email:    user.Email,
-		Password: pass,
+		Name:         user.Name,
+		Username:     user.Username,
+		CurrentEmail: user.Email,
 	}
 }
