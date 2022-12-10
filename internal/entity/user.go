@@ -9,33 +9,25 @@ import (
 
 type User struct {
 	gorm.Model
-	Uuid             uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()"`
-	CognitoId        uuid.UUID
-	SRP              string
-	LastSessionToken string
-	LastAccessToken  string
-	LastIdToken      string
-	LastRefreshToken string
-	DeviceGroupKey   string
-	DeviceKey        string
-	Name             string
-	Username         string `gorm:"unique;not null"`
-	ProfilePic       string
-	BioMessage       string
-	Role             string `gorm:"default:'user'"`
-	IsBanned         bool   `gorm:"default:false"`
-	AddressStreet    string
-	AddressCity      string
-	AddressZip       string
-	Email            string `gorm:"unique;not null"`
-	Password         string `gorm:"not null"`
-	Birthday         string
-	Verified         bool `gorm:"not null"`
-	InviteID         uint
-	OTP              string
-	JWT              string
-	Emails           []*Email
-	Passwords        []*Password
+	Uuid          uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()"`
+	CognitoId     uuid.UUID
+	Name          string
+	Username      string `gorm:"unique;not null"`
+	ProfilePic    string
+	BioMessage    string
+	Role          string `gorm:"default:'user'"`
+	IsBanned      bool   `gorm:"default:false"`
+	AddressStreet string
+	AddressCity   string
+	AddressZip    string
+	Email         string `gorm:"unique;not null"`
+	Password      string `gorm:"not null"`
+	Birthday      string
+	Verified      bool `gorm:"not null"`
+	InviteID      uint
+	OTP           string
+	Emails        []*Email
+	Passwords     []*Password
 }
 
 func (u *User) UpdateUserProfileFromModel(user *model.User) {
