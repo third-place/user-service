@@ -218,7 +218,7 @@ func (s *UserService) RefreshSession(sessionToken *model.SessionToken) (*model.S
 	if err != nil || !token.Valid {
 		return nil, err
 	}
-	if time.Until(claims.ExpiresAt.Time) > 24*3*time.Hour {
+	if time.Until(claims.ExpiresAt.Time) > 24*4*time.Hour {
 		return nil, errors.New("token not ready for refresh")
 	}
 	expirationTime := time.Now().Add(1 * time.Hour)
