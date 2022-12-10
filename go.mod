@@ -5,7 +5,6 @@ go 1.19
 require (
 	github.com/aws/aws-sdk-go v1.25.21
 	github.com/confluentinc/confluent-kafka-go v1.8.2
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.3
 	github.com/jinzhu/gorm v1.9.11

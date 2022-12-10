@@ -142,6 +142,13 @@ var routes = Routes{
 	},
 
 	{
+		"RefreshSession",
+		strings.ToUpper("Put"),
+		"/session",
+		controller.RefreshSessionV1,
+	},
+
+	{
 		"UnbanUserV1",
 		strings.ToUpper("Delete"),
 		"/ban/{username}",

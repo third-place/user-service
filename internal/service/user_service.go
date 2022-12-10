@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/third-place/user-service/internal/db"
 	"github.com/third-place/user-service/internal/entity"
@@ -15,6 +15,7 @@ import (
 	"github.com/third-place/user-service/internal/util"
 	"log"
 	"strings"
+	"time"
 )
 
 type UserService struct {
@@ -207,6 +208,26 @@ func (s *UserService) GetSession(sessionToken *model.SessionToken) (*model.Sessi
 		return nil, err
 	}
 	return model.CreateSession(mapper.MapUserEntityToUser(user), sessionToken.Token), nil
+}
+
+func (s *UserService) RefreshSession(sessionToken *model.SessionToken) (*model.SessionToken, error) {
+	claims := &model.Claims{}
+	token, err := jwt.ParseWithClaims(sessionToken.Token, claims, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+	if err != nil || !token.Valid {
+		return nil, err
+	}
+	if time.Until(claims.ExpiresAt.Time) > 24*3*time.Hour {
+		return nil, errors.New("token not ready for refresh")
+	}
+	expirationTime := time.Now().Add(1 * time.Hour)
+	claims.ExpiresAt = jwt.NewNumericDate(expirationTime)
+	token = jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(jwtKey)
+	return &model.SessionToken{
+		Token: tokenString,
+	}, nil
 }
 
 func (s *UserService) BanUser(sessionUser *entity.User, userEntity *entity.User) error {
