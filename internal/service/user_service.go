@@ -163,7 +163,7 @@ func (s *UserService) UpdateUser(userModel *model.User) error {
 	return nil
 }
 
-func (s *UserService) CreateSession(newSession *model.NewSession) (*AuthResponse, error) {
+func (s *UserService) CreateSession(newSession *model.NewSession) (*model.Session, error) {
 	if newSession.Email == "" {
 		return nil, util.NewInputFieldError(
 			"email",
@@ -190,7 +190,9 @@ func (s *UserService) CreateSession(newSession *model.NewSession) (*AuthResponse
 	if err != nil {
 		return nil, err
 	}
-	return createSessionResponse(search, token), nil
+	return &model.Session{
+		Token: token,
+	}, nil
 }
 
 func (s *UserService) GetSession(sessionToken *model.SessionToken) (*model.Session, error) {
