@@ -40,7 +40,7 @@ func Test_CreateNewUser_SanityCheck(t *testing.T) {
 	}
 }
 
-func Test_RegisteringWith_DuplicateEmails_Error(t *testing.T) {
+func Test_Email_Uniqueness(t *testing.T) {
 	svc := service.CreateTestUserService()
 	code1, _ := svc.CreateInvite()
 	code2, _ := svc.CreateInvite()
@@ -56,6 +56,33 @@ func Test_RegisteringWith_DuplicateEmails_Error(t *testing.T) {
 		Name:       "foo",
 		Username:   util.RandomUsername(),
 		Email:      email,
+		Password:   dummyPassword,
+		InviteCode: code2.Code,
+	}
+	_, _ = svc.CreateUser(userModel1)
+	_, err := svc.CreateUser(userModel2)
+
+	if err == nil {
+		t.Error("expected duplicate email")
+	}
+}
+
+func Test_Username_Uniqueness(t *testing.T) {
+	svc := service.CreateTestUserService()
+	code1, _ := svc.CreateInvite()
+	code2, _ := svc.CreateInvite()
+	username := util.RandomUsername()
+	userModel1 := &model.NewUser{
+		Name:       "foo",
+		Username:   username,
+		Email:      util.RandomEmailAddress(),
+		Password:   dummyPassword,
+		InviteCode: code1.Code,
+	}
+	userModel2 := &model.NewUser{
+		Name:       "foo",
+		Username:   username,
+		Email:      util.RandomEmailAddress(),
 		Password:   dummyPassword,
 		InviteCode: code2.Code,
 	}
