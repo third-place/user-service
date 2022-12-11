@@ -8,7 +8,6 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/third-place/user-service/internal/db"
 	"github.com/third-place/user-service/internal/entity"
-	"log"
 	"math/rand"
 	"os"
 	"strconv"
@@ -71,7 +70,6 @@ func SetupTestDatabase() *gorm.DB {
 		"postgres",
 	)
 
-	log.Print("migrating DB")
 	migrateDb(dbConn)
 
 	return dbConn
