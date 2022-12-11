@@ -27,10 +27,10 @@ type UserService struct {
 var jwtKey = []byte(os.Getenv("JWT_KEY"))
 
 func CreateTestUserService() *UserService {
-	conn := db.CreateDefaultConnection()
+	conn := util.SetupTestDatabase()
 	writer, err := kafka.CreateTestProducer()
 	if err != nil {
-		log.Fatal("error creating kafka writer :: ", err)
+		log.Fatal("error creating test kafka writer :: ", err)
 	}
 	return &UserService{
 		repository.CreateUserRepository(conn),
