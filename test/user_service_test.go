@@ -90,3 +90,45 @@ func Test_Username_Uniqueness(t *testing.T) {
 		t.Error("expected duplicate email")
 	}
 }
+
+func Test_Password_Length(t *testing.T) {
+	// setup
+	svc := service.CreateTestService()
+
+	// when
+	_, err := svc.CreateInvitedUser(&model.NewUser{
+		Username: util.RandomUsername(),
+		Email:    util.RandomEmailAddress(),
+		Password: "foo",
+	})
+
+	// then
+	if err == nil {
+		t.Error("expected error")
+	}
+	inputErr := err.(*util.InputFieldError)
+	if inputErr.Input != "password" {
+		t.Error("input error expected to be password")
+	}
+}
+
+func Test_Password_Complexity(t *testing.T) {
+	// setup
+	svc := service.CreateTestService()
+
+	// when
+	_, err := svc.CreateInvitedUser(&model.NewUser{
+		Username: util.RandomUsername(),
+		Email:    util.RandomEmailAddress(),
+		Password: "fooooooo",
+	})
+
+	// then
+	if err == nil {
+		t.Error("expected error")
+	}
+	inputErr := err.(*util.InputFieldError)
+	if inputErr.Input != "password" {
+		t.Error("input error expected to be password")
+	}
+}
