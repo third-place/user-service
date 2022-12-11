@@ -153,8 +153,7 @@ func SubmitOTPV1(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	userService := service.CreateUserService()
-	err = userService.SubmitOTP(otpModel)
+	err = service.CreateUserService().SubmitOTP(otpModel)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
@@ -167,8 +166,7 @@ func SubmitForgotPasswordV1(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	userService := service.CreateUserService()
-	err = userService.ForgotPassword(userModel)
+	err = service.CreateUserService().ForgotPassword(userModel)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
@@ -181,8 +179,7 @@ func ConfirmForgotPasswordV1(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	userService := service.CreateUserService()
-	err = userService.ConfirmForgotPassword(otpModel)
+	err = service.CreateUserService().ConfirmForgotPassword(otpModel)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
