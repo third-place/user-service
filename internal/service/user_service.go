@@ -29,10 +29,14 @@ var jwtKey = []byte(os.Getenv("JWT_KEY"))
 
 func CreateDefaultUserService() *UserService {
 	conn := db.CreateDefaultConnection()
+	writer, err := kafka2.CreateWriter()
+	if err != nil {
+		log.Fatal("error creating kafka writer :: ", err)
+	}
 	return CreateUserService(
 		repository.CreateUserRepository(conn),
 		repository.CreateInviteRepository(conn),
-		kafka2.CreateWriter(),
+		writer,
 	)
 }
 
