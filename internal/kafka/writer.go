@@ -5,7 +5,25 @@ import (
 	"os"
 )
 
-func CreateWriter() (*kafka.Producer, error) {
+type Producer interface {
+	Produce(msg *kafka.Message, deliveryChan chan kafka.Event) error
+}
+
+type TestProducer struct{}
+
+func (t *TestProducer) Produce(msg *kafka.Message, deliveryChan chan kafka.Event) error {
+	return nil
+}
+
+func CreateMessage(data []byte, topic string) *kafka.Message {
+	return &kafka.Message{
+		Value: data,
+		TopicPartition: kafka.TopicPartition{Topic: &topic,
+			Partition: kafka.PartitionAny},
+	}
+}
+
+func CreateProducer() (Producer, error) {
 	return kafka.NewProducer(&kafka.ConfigMap{
 		"bootstrap.servers": os.Getenv("KAFKA_BOOTSTRAP_SERVERS"),
 		"security.protocol": os.Getenv("KAFKA_SECURITY_PROTOCOL"),
@@ -13,4 +31,8 @@ func CreateWriter() (*kafka.Producer, error) {
 		"sasl.username":     os.Getenv("KAFKA_SASL_USERNAME"),
 		"sasl.password":     os.Getenv("KAFKA_SASL_PASSWORD"),
 	})
+}
+
+func CreateTestProducer() (Producer, error) {
+	return &TestProducer{}, nil
 }

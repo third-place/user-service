@@ -3,12 +3,11 @@ package service
 import (
 	"encoding/json"
 	"errors"
-	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/third-place/user-service/internal/db"
 	"github.com/third-place/user-service/internal/entity"
-	kafka2 "github.com/third-place/user-service/internal/kafka"
+	"github.com/third-place/user-service/internal/kafka"
 	"github.com/third-place/user-service/internal/mapper"
 	"github.com/third-place/user-service/internal/model"
 	"github.com/third-place/user-service/internal/repository"
@@ -22,14 +21,27 @@ import (
 type UserService struct {
 	userRepository   *repository.UserRepository
 	inviteRepository *repository.InviteRepository
-	kafkaWriter      *kafka.Producer
+	kafkaWriter      kafka.Producer
 }
 
 var jwtKey = []byte(os.Getenv("JWT_KEY"))
 
+func CreateTestUserService() *UserService {
+	conn := db.CreateDefaultConnection()
+	writer, err := kafka.CreateTestProducer()
+	if err != nil {
+		log.Fatal("error creating kafka writer :: ", err)
+	}
+	return &UserService{
+		repository.CreateUserRepository(conn),
+		repository.CreateInviteRepository(conn),
+		writer,
+	}
+}
+
 func CreateUserService() *UserService {
 	conn := db.CreateDefaultConnection()
-	writer, err := kafka2.CreateWriter()
+	writer, err := kafka.CreateProducer()
 	if err != nil {
 		log.Fatal("error creating kafka writer :: ", err)
 	}
@@ -320,17 +332,22 @@ func (s *UserService) CreateInviteFromCode(code string) (*model.Invite, error) {
 	return mapper.MapInviteEntityToModel(invite), nil
 }
 
+func (s *UserService) CreateInvite() (*model.Invite, error) {
+	invite := &entity.Invite{
+		Code: util.GenerateCode(),
+	}
+	result := s.inviteRepository.Create(invite)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return mapper.MapInviteEntityToModel(invite), nil
+}
+
 func (s *UserService) publishUserToKafka(userEntity *entity.User) error {
 	topic := "users"
 	userModel := mapper.MapUserEntityToModel(userEntity)
 	userData, _ := json.Marshal(userModel)
-	return s.kafkaWriter.Produce(
-		&kafka.Message{
-			Value: userData,
-			TopicPartition: kafka.TopicPartition{Topic: &topic,
-				Partition: kafka.PartitionAny},
-		},
-		nil)
+	return s.kafkaWriter.Produce(kafka.CreateMessage(userData, topic), nil)
 }
 
 func (s *UserService) canAdminister(sessionUser *entity.User, user *entity.User) bool {

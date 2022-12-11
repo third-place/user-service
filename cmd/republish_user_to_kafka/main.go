@@ -20,7 +20,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	username := os.Args[1]
-	kafkaWriter, err := kafka2.CreateWriter()
+	kafkaWriter, err := kafka2.CreateProducer()
 	if err != nil {
 		log.Fatal(err)
 	}
