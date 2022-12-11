@@ -19,7 +19,7 @@ func CreateNewUserV1(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	user, err := service.CreateDefaultUserService().CreateUser(newUserModel)
+	user, err := service.CreateUserService().CreateUser(newUserModel)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		if _, ok := err.(*util.InputFieldError); ok {
@@ -41,7 +41,7 @@ func GetUserByUsernameV1(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	username := params["username"]
 
-	user, err := service.CreateDefaultUserService().GetUserFromUsername(username)
+	user, err := service.CreateUserService().GetUserFromUsername(username)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -59,7 +59,7 @@ func UpdateUserV1(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	userService := service.CreateDefaultUserService()
+	userService := service.CreateUserService()
 	sessionToken := getSessionToken(r)
 	sessionModel := &model.SessionToken{
 		Token: sessionToken,
@@ -83,7 +83,7 @@ func UpdateUserV1(w http.ResponseWriter, r *http.Request) {
 func BanUserV1(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	usernameParam := params["username"]
-	userService := service.CreateDefaultUserService()
+	userService := service.CreateUserService()
 	userRepository := repository.CreateUserRepository(db.CreateDefaultConnection())
 	sessionToken := getSessionToken(r)
 	sessionModel := &model.SessionToken{
@@ -119,7 +119,7 @@ func BanUserV1(w http.ResponseWriter, r *http.Request) {
 func UnbanUserV1(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	usernameParam := params["username"]
-	userService := service.CreateDefaultUserService()
+	userService := service.CreateUserService()
 	userRepository := repository.CreateUserRepository(db.CreateDefaultConnection())
 	sessionToken := getSessionToken(r)
 	sessionModel := &model.SessionToken{
@@ -153,7 +153,7 @@ func SubmitOTPV1(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	userService := service.CreateDefaultUserService()
+	userService := service.CreateUserService()
 	err = userService.SubmitOTP(otpModel)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -167,7 +167,7 @@ func SubmitForgotPasswordV1(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	userService := service.CreateDefaultUserService()
+	userService := service.CreateUserService()
 	err = userService.ForgotPassword(userModel)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -181,7 +181,7 @@ func ConfirmForgotPasswordV1(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	userService := service.CreateDefaultUserService()
+	userService := service.CreateUserService()
 	err = userService.ConfirmForgotPassword(otpModel)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

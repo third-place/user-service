@@ -27,28 +27,16 @@ type UserService struct {
 
 var jwtKey = []byte(os.Getenv("JWT_KEY"))
 
-func CreateDefaultUserService() *UserService {
+func CreateUserService() *UserService {
 	conn := db.CreateDefaultConnection()
 	writer, err := kafka2.CreateWriter()
 	if err != nil {
 		log.Fatal("error creating kafka writer :: ", err)
 	}
-	return CreateUserService(
+	return &UserService{
 		repository.CreateUserRepository(conn),
 		repository.CreateInviteRepository(conn),
 		writer,
-	)
-}
-
-func CreateUserService(
-	userRepository *repository.UserRepository,
-	inviteRepository *repository.InviteRepository,
-	kafkaWriter *kafka.Producer,
-) *UserService {
-	return &UserService{
-		userRepository:   userRepository,
-		inviteRepository: inviteRepository,
-		kafkaWriter:      kafkaWriter,
 	}
 }
 

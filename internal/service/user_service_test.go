@@ -27,7 +27,7 @@ func GetEmailAddress() string {
 }
 
 func Test_CreateNewUser_SanityCheck(t *testing.T) {
-	user, err := CreateDefaultUserService().CreateUser(&model.NewUser{
+	user, err := CreateUserService().CreateUser(&model.NewUser{
 		Name:     "foo",
 		Email:    GetEmailAddress(),
 		Password: dummyPassword,
@@ -39,7 +39,7 @@ func Test_CreateNewUser_SanityCheck(t *testing.T) {
 }
 
 func Test_RegisteringWith_DuplicateEmails_Error(t *testing.T) {
-	svc := CreateDefaultUserService()
+	svc := CreateUserService()
 	userModel := &model.NewUser{
 		Name:     "foo",
 		Email:    GetEmailAddress(),
@@ -54,7 +54,7 @@ func Test_RegisteringWith_DuplicateEmails_Error(t *testing.T) {
 }
 
 func Test_CreateFirstSession_WillReceiveChallenge(t *testing.T) {
-	svc := CreateDefaultUserService()
+	svc := CreateUserService()
 	email := GetEmailAddress()
 	_, _ = svc.CreateUser(&model.NewUser{
 		Email:    email,

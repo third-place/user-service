@@ -15,7 +15,7 @@ func CreateSessionV1(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	result, err := service.CreateDefaultUserService().CreateSession(newSessionModel)
+	result, err := service.CreateUserService().CreateSession(newSessionModel)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		data, _ := json.Marshal(err)
@@ -30,7 +30,7 @@ func CreateSessionV1(w http.ResponseWriter, r *http.Request) {
 // GetSessionV1 - validate a session token
 func GetSessionV1(w http.ResponseWriter, r *http.Request) {
 	sessionToken := model.DecodeRequestToSessionToken(r)
-	session, err := service.CreateDefaultUserService().GetSession(sessionToken)
+	session, err := service.CreateUserService().GetSession(sessionToken)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		log.Print("sanity: ", sessionToken.Token)
@@ -44,7 +44,7 @@ func GetSessionV1(w http.ResponseWriter, r *http.Request) {
 // RefreshSessionV1 - refresh a session token
 func RefreshSessionV1(w http.ResponseWriter, r *http.Request) {
 	sessionToken := model.DecodeRequestToSessionToken(r)
-	session, err := service.CreateDefaultUserService().RefreshSession(sessionToken)
+	session, err := service.CreateUserService().RefreshSession(sessionToken)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Print("sanity: ", sessionToken.Token)
