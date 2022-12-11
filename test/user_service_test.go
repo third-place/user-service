@@ -41,6 +41,36 @@ func Test_CreateNewUser_SanityCheck(t *testing.T) {
 	}
 }
 
+func Test_CannotUpdate_OtherUsers(t *testing.T) {
+	// setup
+	svc := service.CreateTestService()
+
+	// given
+	user1, err := svc.CreateInvitedUser(&model.NewUser{
+		Username: util.RandomUsername(),
+		Email:    util.RandomEmailAddress(),
+		Password: dummyPassword,
+	})
+	user2, err := svc.CreateInvitedUser(&model.NewUser{
+		Username: util.RandomUsername(),
+		Email:    util.RandomEmailAddress(),
+		Password: dummyPassword,
+	})
+
+	// when
+	err = svc.UpdateUser(
+		&model.Session{
+			User: user1,
+		},
+		user2,
+	)
+
+	// then
+	if err == nil || err.Error() != "unauthorized" {
+		t.Error("expected error when one user updates another user")
+	}
+}
+
 func Test_Email_Uniqueness(t *testing.T) {
 	// setup
 	svc := service.CreateTestService()

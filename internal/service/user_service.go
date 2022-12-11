@@ -152,7 +152,10 @@ func (s *UserService) CreateUser(newUser *model.NewUser) (*model.User, error) {
 	return userModel, nil
 }
 
-func (s *UserService) UpdateUser(userModel *model.User) error {
+func (s *UserService) UpdateUser(session *model.Session, userModel *model.User) error {
+	if session.User.Uuid != userModel.Uuid {
+		return errors.New("unauthorized")
+	}
 	userEntity, err := s.userRepository.GetUserFromUuid(uuid.MustParse(userModel.Uuid))
 	if err != nil {
 		return err

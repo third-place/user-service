@@ -20,3 +20,7 @@ func (t *TestService) CreateInvitedUser(user *model.NewUser) (*model.User, error
 	user.Name = "foo"
 	return t.userService.CreateUser(user)
 }
+
+func (t *TestService) UpdateUser(session *model.Session, user *model.User) error {
+	return t.userService.UpdateUser(session, user)
+}

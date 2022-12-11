@@ -65,11 +65,11 @@ func UpdateUserV1(w http.ResponseWriter, r *http.Request) {
 		Token: sessionToken,
 	}
 	session, err := userService.GetSession(sessionModel)
-	if err != nil || session.User.Uuid != userModel.Uuid {
+	if err != nil {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	err = userService.UpdateUser(userModel)
+	err = userService.UpdateUser(session, userModel)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
