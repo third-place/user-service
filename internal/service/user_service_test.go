@@ -61,6 +61,47 @@ func Test_GetUser(t *testing.T) {
 	}
 }
 
+func Test_UserCan_UpdateSelf(t *testing.T) {
+	// setup
+	svc := CreateTestService()
+
+	// given
+	user, _ := svc.CreateInvitedUser(&model.NewUser{
+		Username: util.RandomUsername(),
+		Email:    util.RandomEmailAddress(),
+		Password: dummyPassword,
+	})
+	_ = svc.UpdateUser(
+		&model.Session{
+			User: user,
+		},
+		&model.User{
+			Uuid:       user.Uuid,
+			Name:       "MyName",
+			ProfilePic: "MyProfilePic",
+			BioMessage: "Hello World",
+			Birthday:   "2000-01-01",
+		},
+	)
+
+	// when
+	user, _ = svc.GetUserFromUuid(uuid.MustParse(user.Uuid))
+
+	// then
+	if user.Name != "MyName" {
+		t.Error("expected to update user")
+	}
+	if user.ProfilePic != "MyProfilePic" {
+		t.Error("expected to update profile pic")
+	}
+	if user.BioMessage != "Hello World" {
+		t.Error("expected to update bio message")
+	}
+	if user.Birthday != "2000-01-01" {
+		t.Error("expected to update birthday")
+	}
+}
+
 func Test_CannotUpdate_OtherUsers(t *testing.T) {
 	// setup
 	svc := CreateTestService()
@@ -88,6 +129,28 @@ func Test_CannotUpdate_OtherUsers(t *testing.T) {
 	// then
 	if err == nil || err.Error() != "unauthorized" {
 		t.Error("expected error when one user updates another user")
+	}
+}
+
+func Test_Needs_Valid_Invite(t *testing.T) {
+	// setup
+	svc := CreateTestService()
+
+	// when
+	_, err := svc.CreateUser(
+		&model.Invite{
+			Code: "this-does-not-exist",
+		},
+		&model.NewUser{
+			Username: util.RandomUsername(),
+			Email:    util.RandomEmailAddress(),
+			Password: dummyPassword,
+		},
+	)
+
+	// then
+	if err == nil {
+		t.Error("expected valid invite code")
 	}
 }
 
