@@ -104,6 +104,29 @@ func Test_Can_Login(t *testing.T) {
 	}
 }
 
+func Test_Needs_Correct_Password(t *testing.T) {
+	// setup
+	svc := CreateTestService()
+
+	// given
+	user, err := svc.CreateInvitedUser(&model.NewUser{
+		Username: util.RandomUsername(),
+		Email:    util.RandomEmailAddress(),
+		Password: dummyPassword,
+	})
+
+	// when
+	session, err := svc.CreateSession(&model.NewSession{
+		Email:    user.Email,
+		Password: "foo",
+	})
+
+	// then
+	if session != nil || err == nil {
+		t.Error("expected error with wrong password")
+	}
+}
+
 func Test_UserCan_UpdateSelf(t *testing.T) {
 	// setup
 	svc := CreateTestService()
