@@ -129,15 +129,6 @@ func (s *UserService) CreateUser(newUser *model.NewUser) (*model.User, error) {
 		}
 		return nil, errors.New("error creating user")
 	}
-	if err != nil {
-		log.Print("user not found :: ", err)
-		return nil, err
-	}
-	if err != nil {
-		log.Print("error creating cognito user :: ", err)
-		s.userRepository.Delete(user)
-		return nil, errors.New("error creating user")
-	}
 	invite.Claimed = true
 	s.inviteRepository.Save(invite)
 	result = s.userRepository.Save(user)

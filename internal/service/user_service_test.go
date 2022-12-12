@@ -1,9 +1,9 @@
-package test
+package service
 
 import (
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/third-place/user-service/internal/model"
-	"github.com/third-place/user-service/internal/service"
 	"github.com/third-place/user-service/internal/util"
 	"math/rand"
 	"os"
@@ -26,7 +26,7 @@ func TestMain(m *testing.M) {
 
 func Test_CreateNewUser_SanityCheck(t *testing.T) {
 	// setup
-	svc := service.CreateTestService()
+	svc := CreateTestService()
 
 	// when
 	user, err := svc.CreateInvitedUser(&model.NewUser{
@@ -41,9 +41,29 @@ func Test_CreateNewUser_SanityCheck(t *testing.T) {
 	}
 }
 
+func Test_GetUser(t *testing.T) {
+	// setup
+	svc := CreateTestService()
+
+	// given
+	user, err := svc.CreateInvitedUser(&model.NewUser{
+		Username: util.RandomUsername(),
+		Email:    util.RandomEmailAddress(),
+		Password: dummyPassword,
+	})
+
+	// when
+	getUser, err := svc.GetUserFromUuid(uuid.MustParse(user.Uuid))
+
+	// then
+	if getUser == nil || err != nil {
+		t.Error(err)
+	}
+}
+
 func Test_CannotUpdate_OtherUsers(t *testing.T) {
 	// setup
-	svc := service.CreateTestService()
+	svc := CreateTestService()
 
 	// given
 	user1, err := svc.CreateInvitedUser(&model.NewUser{
@@ -71,9 +91,40 @@ func Test_CannotUpdate_OtherUsers(t *testing.T) {
 	}
 }
 
+func Test_Cannot_Reuse_Invite(t *testing.T) {
+	// setup
+	svc := CreateTestService()
+
+	// given
+	invite, _ := svc.CreateInvite()
+
+	// when
+	_, _ = svc.CreateUser(
+		invite,
+		&model.NewUser{
+			Username: util.RandomUsername(),
+			Email:    util.RandomEmailAddress(),
+			Password: dummyPassword,
+		},
+	)
+	_, err := svc.CreateUser(
+		invite,
+		&model.NewUser{
+			Username: util.RandomUsername(),
+			Email:    util.RandomEmailAddress(),
+			Password: dummyPassword,
+		},
+	)
+
+	// then
+	if err == nil {
+		t.Error("expected failure when re-using invite")
+	}
+}
+
 func Test_Email_Uniqueness(t *testing.T) {
 	// setup
-	svc := service.CreateTestService()
+	svc := CreateTestService()
 
 	// given
 	email := util.RandomEmailAddress()
@@ -98,7 +149,7 @@ func Test_Email_Uniqueness(t *testing.T) {
 
 func Test_Username_Uniqueness(t *testing.T) {
 	// setup
-	svc := service.CreateTestService()
+	svc := CreateTestService()
 
 	// given
 	username := util.RandomUsername()
@@ -123,7 +174,7 @@ func Test_Username_Uniqueness(t *testing.T) {
 
 func Test_Password_Length(t *testing.T) {
 	// setup
-	svc := service.CreateTestService()
+	svc := CreateTestService()
 
 	// when
 	_, err := svc.CreateInvitedUser(&model.NewUser{
@@ -144,7 +195,7 @@ func Test_Password_Length(t *testing.T) {
 
 func Test_Password_Complexity(t *testing.T) {
 	// setup
-	svc := service.CreateTestService()
+	svc := CreateTestService()
 
 	// when
 	_, err := svc.CreateInvitedUser(&model.NewUser{
