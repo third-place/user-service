@@ -35,7 +35,7 @@ func (r *UserRepository) GetUserFromUuid(uuid uuid.UUID) (*entity.User, error) {
 
 func (r *UserRepository) GetUserFromEmail(email string) (*entity.User, error) {
 	user := &entity.User{}
-	r.conn.Where("current_email = ?", email).Find(&user)
+	r.conn.Where("email = ?", email).Find(&user)
 	if user.ID == 0 {
 		return nil, errors.New("user not found")
 	}

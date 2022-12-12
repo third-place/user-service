@@ -41,7 +41,7 @@ func Test_CreateNewUser_SanityCheck(t *testing.T) {
 	}
 }
 
-func Test_GetUser(t *testing.T) {
+func Test_GetUserByUuid(t *testing.T) {
 	// setup
 	svc := CreateTestService()
 
@@ -57,6 +57,49 @@ func Test_GetUser(t *testing.T) {
 
 	// then
 	if getUser == nil || err != nil {
+		t.Error(err)
+	}
+}
+
+func Test_GetUserByUsername(t *testing.T) {
+	// setup
+	svc := CreateTestService()
+
+	// given
+	user, err := svc.CreateInvitedUser(&model.NewUser{
+		Username: util.RandomUsername(),
+		Email:    util.RandomEmailAddress(),
+		Password: dummyPassword,
+	})
+
+	// when
+	getUser, err := svc.GetUserFromUsername(user.Username)
+
+	// then
+	if getUser == nil || err != nil {
+		t.Error(err)
+	}
+}
+
+func Test_Can_Login(t *testing.T) {
+	// setup
+	svc := CreateTestService()
+
+	// given
+	user, err := svc.CreateInvitedUser(&model.NewUser{
+		Username: util.RandomUsername(),
+		Email:    util.RandomEmailAddress(),
+		Password: dummyPassword,
+	})
+
+	// when
+	session, err := svc.CreateSession(&model.NewSession{
+		Email:    user.Email,
+		Password: dummyPassword,
+	})
+
+	// then
+	if session == nil || err != nil {
 		t.Error(err)
 	}
 }

@@ -39,3 +39,11 @@ func (t *TestService) UpdateUser(session *model.Session, user *model.User) error
 func (t *TestService) GetUserFromUuid(uuid uuid.UUID) (*model.User, error) {
 	return t.userService.GetUserFromUuid(uuid)
 }
+
+func (t *TestService) GetUserFromUsername(username string) (*model.User, error) {
+	return t.userService.GetUserFromUsername(username)
+}
+
+func (t *TestService) CreateSession(newSession *model.NewSession) (*model.Session, error) {
+	return t.userService.CreateSession(newSession)
+}
