@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"log"
 	"os"
 )
 
@@ -17,7 +18,7 @@ func GetReader() *kafka.Consumer {
 	})
 
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	c.SubscribeTopics([]string{"images"}, nil)
