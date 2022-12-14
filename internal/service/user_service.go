@@ -28,7 +28,7 @@ var jwtKey = []byte(os.Getenv("JWT_KEY"))
 
 func CreateTestUserService() *UserService {
 	conn := util.SetupTestDatabase()
-	writer, err := kafka.CreateTestProducer()
+	writer, err := util.CreateTestProducer()
 	if err != nil {
 		log.Fatal("error creating test kafka writer :: ", err)
 	}

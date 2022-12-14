@@ -2,12 +2,14 @@ package util
 
 import (
 	"context"
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/goombaio/namegenerator"
 	"github.com/jinzhu/gorm"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/third-place/user-service/internal/db"
 	"github.com/third-place/user-service/internal/entity"
+	kafka2 "github.com/third-place/user-service/internal/kafka"
 	"math/rand"
 	"os"
 	"strconv"
@@ -78,4 +80,14 @@ func SetupTestDatabase() *gorm.DB {
 func migrateDb(dbConn *gorm.DB) {
 	dbConn.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
 	dbConn.AutoMigrate(&entity.User{}, &entity.Invite{})
+}
+
+type TestProducer struct{}
+
+func (t *TestProducer) Produce(msg *kafka.Message, deliveryChan chan kafka.Event) error {
+	return nil
+}
+
+func CreateTestProducer() (kafka2.Producer, error) {
+	return &TestProducer{}, nil
 }
