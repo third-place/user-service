@@ -111,7 +111,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: user-service
-                  key: jwt_key
+                  key: jwt-key
+            - name: SENDGRID_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: user-service
+                  key: sendgrid-api-key
       imagePullSecrets:
         - name: dockerconfigjson-github-com
         - name: postgres-user
