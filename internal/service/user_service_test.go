@@ -36,8 +36,12 @@ func Test_CreateNewUser_SanityCheck(t *testing.T) {
 	})
 
 	// then
-	if user == nil || err != nil {
+	if err != nil {
 		t.Error(err)
+	}
+
+	if user == nil {
+		t.Fail()
 	}
 }
 
@@ -78,6 +82,21 @@ func Test_GetUserByUsername(t *testing.T) {
 	// then
 	if getUser == nil || err != nil {
 		t.Error(err)
+	}
+}
+
+func Test_GetUserByUsername_HandlesMissingUser(t *testing.T) {
+	// setup
+	svc := CreateTestService()
+
+	// given
+
+	// when
+	getUser, err := svc.GetUserFromUsername(util.RandomUsername())
+
+	// then
+	if getUser != nil || err == nil {
+		t.Fail()
 	}
 }
 
