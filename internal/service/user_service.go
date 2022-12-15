@@ -132,9 +132,6 @@ func (s *UserService) CreateUser(newUser *model.NewUser) (*model.User, error) {
 	invite.Claimed = true
 	s.inviteRepository.Save(invite)
 	result = s.userRepository.Save(user)
-	if result.Error != nil {
-		log.Print("error updating user with cognito ID :: ", result.Error)
-	}
 	userModel := mapper.MapUserEntityToModel(user)
 	err = s.publishUserToKafka(user)
 	if err != nil {
