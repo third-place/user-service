@@ -47,3 +47,7 @@ func (t *TestService) GetUserFromUsername(username string) (*model.User, error) 
 func (t *TestService) CreateSession(newSession *model.NewSession) (*model.Session, error) {
 	return t.userService.CreateSession(newSession)
 }
+
+func (t *TestService) GetSession(sessionToken *model.SessionToken) (*model.Session, error) {
+	return t.userService.GetSession(sessionToken)
+}

@@ -60,8 +60,25 @@ func Test_GetUserByUuid(t *testing.T) {
 	getUser, err := svc.GetUserFromUuid(uuid.MustParse(user.Uuid))
 
 	// then
-	if getUser == nil || err != nil {
+	if err != nil {
 		t.Error(err)
+	}
+
+	if getUser == nil {
+		t.Fail()
+	}
+}
+
+func Test_GetUserByUuid_HandlesMissingUser(t *testing.T) {
+	// setup
+	svc := CreateTestService()
+
+	// when
+	getUser, err := svc.GetUserFromUuid(uuid.New())
+
+	// then
+	if getUser != nil || err == nil {
+		t.Fail()
 	}
 }
 
@@ -80,8 +97,12 @@ func Test_GetUserByUsername(t *testing.T) {
 	getUser, err := svc.GetUserFromUsername(user.Username)
 
 	// then
-	if getUser == nil || err != nil {
+	if err != nil {
 		t.Error(err)
+	}
+
+	if getUser == nil {
+		t.Fail()
 	}
 }
 
@@ -118,8 +139,62 @@ func Test_Can_Login(t *testing.T) {
 	})
 
 	// then
-	if session == nil || err != nil {
+	if err != nil {
 		t.Error(err)
+	}
+
+	if session == nil {
+		t.Fail()
+	}
+}
+
+func Test_Can_GetSession(t *testing.T) {
+	// setup
+	svc := CreateTestService()
+
+	// given
+	user, err := svc.CreateInvitedUser(&model.NewUser{
+		Username: util.RandomUsername(),
+		Email:    util.RandomEmailAddress(),
+		Password: dummyPassword,
+	})
+	session, err := svc.CreateSession(&model.NewSession{
+		Email:    user.Email,
+		Password: dummyPassword,
+	})
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	// when
+	getSession, err := svc.GetSession(&model.SessionToken{
+		Token: session.Token,
+	})
+
+	// then
+	if err != nil {
+		t.Error(err)
+	}
+
+	if getSession == nil {
+		t.Fail()
+	}
+}
+
+func Test_Can_GetSession_FailsCorrectly(t *testing.T) {
+	// setup
+	svc := CreateTestService()
+
+	// given
+	// when
+	getSession, err := svc.GetSession(&model.SessionToken{
+		Token: uuid.New().String(),
+	})
+
+	// then
+	if getSession != nil || err == nil {
+		t.Fail()
 	}
 }
 
@@ -142,7 +217,7 @@ func Test_Needs_Correct_Password(t *testing.T) {
 
 	// then
 	if session != nil || err == nil {
-		t.Error("expected error with wrong password")
+		t.Fail()
 	}
 }
 
@@ -235,7 +310,7 @@ func Test_Needs_Valid_Invite(t *testing.T) {
 
 	// then
 	if err == nil {
-		t.Error("expected valid invite code")
+		t.Fail()
 	}
 }
 
@@ -266,7 +341,7 @@ func Test_Cannot_Reuse_Invite(t *testing.T) {
 
 	// then
 	if err == nil {
-		t.Error("expected failure when re-using invite")
+		t.Fail()
 	}
 }
 
@@ -291,7 +366,7 @@ func Test_Email_Uniqueness(t *testing.T) {
 
 	// then
 	if err == nil {
-		t.Error("expected duplicate email")
+		t.Fail()
 	}
 }
 
@@ -316,7 +391,7 @@ func Test_Username_Uniqueness(t *testing.T) {
 
 	// then
 	if err == nil {
-		t.Error("expected duplicate email")
+		t.Fail()
 	}
 }
 
@@ -333,11 +408,11 @@ func Test_Password_Length(t *testing.T) {
 
 	// then
 	if err == nil {
-		t.Error("expected error")
+		t.Fail()
 	}
 	inputErr := err.(*util.InputFieldError)
 	if inputErr.Input != "password" {
-		t.Error("input error expected to be password")
+		t.Fail()
 	}
 }
 
@@ -354,10 +429,10 @@ func Test_Password_Complexity(t *testing.T) {
 
 	// then
 	if err == nil {
-		t.Error("expected error")
+		t.Fail()
 	}
 	inputErr := err.(*util.InputFieldError)
 	if inputErr.Input != "password" {
-		t.Error("input error expected to be password")
+		t.Fail()
 	}
 }
