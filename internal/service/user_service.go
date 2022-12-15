@@ -21,6 +21,7 @@ import (
 type UserService struct {
 	userRepository   *repository.UserRepository
 	inviteRepository *repository.InviteRepository
+	mailService      *MailService
 	kafkaWriter      kafka.Producer
 }
 
@@ -35,6 +36,7 @@ func CreateTestUserService() *UserService {
 	return &UserService{
 		repository.CreateUserRepository(conn),
 		repository.CreateInviteRepository(conn),
+		CreateTestMailService(),
 		writer,
 	}
 }
@@ -48,6 +50,8 @@ func CreateUserService() *UserService {
 	return &UserService{
 		repository.CreateUserRepository(conn),
 		repository.CreateInviteRepository(conn),
+		//CreateMailService(),
+		CreateTestMailService(),
 		writer,
 	}
 }
@@ -131,7 +135,12 @@ func (s *UserService) CreateUser(newUser *model.NewUser) (*model.User, error) {
 	}
 	invite.Claimed = true
 	s.inviteRepository.Save(invite)
-	result = s.userRepository.Save(user)
+	user.OTP = util.GenerateCode()
+	s.userRepository.Save(user)
+	_, err = s.mailService.SendVerificationEmail(user)
+	if err != nil {
+		log.Print(err)
+	}
 	userModel := mapper.MapUserEntityToModel(user)
 	err = s.publishUserToKafka(user)
 	if err != nil {
@@ -268,6 +277,10 @@ func (s *UserService) ForgotPassword(user *model.User) error {
 	}
 	userEntity.OTP = util.GenerateCode()
 	s.userRepository.Save(userEntity)
+	_, err = s.mailService.SendPasswordResetEmail(userEntity)
+	if err != nil {
+		log.Print(err)
+	}
 	return nil
 }
 
