@@ -16,4 +16,4 @@ jobs:
         with:
           default_author: github_actor
           message: "Deploy version ${{ inputs.tag }} to production"
-          new_branch: release-prod-${{ github.ref_name }}
+          new_branch: release-prod-${{ inputs.tag }}
