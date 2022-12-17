@@ -7,16 +7,9 @@ jobs:
     uses: third-place/actions/.github/workflows/publish-docker-image.yaml@main
     secrets: inherit
   deploy-to-dev:
-    runs-on: ubuntu-latest
+    uses: third-place/actions/.github/workflows/deploy-to-env.yaml@main
     needs: publish-dev-docker
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: main
-          token: ${{ secrets.ACTIONS_CHECKOUT_PAT }}
-      - run: sudo snap install yq
-      - run: yq -i '.spec.template.spec.containers[0].image = "ghcr.io/${{ github.repository }}:${{ github.ref_name }}"' kustomize/dev/deployment.yaml
-      - uses: EndBug/add-and-commit@v9
-        with:
-          default_author: github_actor
-          message: "Deploy version ${{ github.ref_name }} to development"
+    with:
+      tag: ${{ github.ref_name }}
+      env: dev
+    secrets: inherit
