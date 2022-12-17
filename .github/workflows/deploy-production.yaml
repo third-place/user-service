@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.ACTIONS_CHECKOUT_PAT }}
       - run: sudo snap install yq
       - run: yq -i '.spec.template.spec.containers[0].image = "ghcr.io/${{ github.repository }}:${{ inputs.tag }}"' kustomize/prod/deployment.yaml
       - uses: EndBug/add-and-commit@v9
