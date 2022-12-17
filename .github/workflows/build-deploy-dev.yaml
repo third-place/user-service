@@ -28,4 +28,3 @@ jobs:
         with:
           default_author: github_actor
           message: "Deploy version ${{ github.ref_name }} to development"
-          new_branch: release/dev/${{ github.ref_name }}
