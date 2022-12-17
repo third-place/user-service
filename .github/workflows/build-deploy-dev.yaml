@@ -3,18 +3,9 @@ on:
     tags:
       - '*'
 jobs:
-  publish-docker-image:
-    runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v3
-      # login to ghcr
-      - run: echo ${{ secrets.CR_PAT }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
-      # build the docker image
-      - run: docker build -t ghcr.io/${{ github.repository }}:${{ github.ref_name }} .
-      - run: docker push ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+  publish-dev-docker:
+    uses: third-place/actions/.github/workflows/publish-docker-image.yaml@main
+    secrets: inherit
   deploy-to-dev:
     runs-on: ubuntu-latest
     needs: publish-docker-image
