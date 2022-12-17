@@ -25,7 +25,7 @@ type MailService struct {
 var fromMail *mail.Email
 
 func init() {
-	fromMail = mail.NewEmail("Example User", "test@example.com")
+	fromMail = mail.NewEmail("ThirdplaceBot", "info@thirdplaceapp.com")
 }
 
 func CreateMailService() *MailService {
