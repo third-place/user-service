@@ -7,15 +7,8 @@ on:
         type: string
 jobs:
   deploy-to-prod:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: main
-          token: ${{ secrets.ACTIONS_CHECKOUT_PAT }}
-      - run: sudo snap install yq
-      - run: yq -i '.spec.template.spec.containers[0].image = "ghcr.io/${{ github.repository }}:${{ inputs.tag }}"' kustomize/prod/deployment.yaml
-      - uses: EndBug/add-and-commit@v9
-        with:
-          default_author: github_actor
-          message: "Deploy version ${{ inputs.tag }} to production"
+    uses: third-place/actions/.github/workflows/deploy-to-env.yaml@main
+    with:
+      tag: ${{ inputs.tag }}
+      env: prod
+    secrets: inherit
