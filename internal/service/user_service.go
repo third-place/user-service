@@ -50,8 +50,7 @@ func CreateUserService() *UserService {
 	return &UserService{
 		repository.CreateUserRepository(conn),
 		repository.CreateInviteRepository(conn),
-		//CreateMailService(),
-		CreateTestMailService(),
+		CreateMailService(),
 		writer,
 	}
 }
