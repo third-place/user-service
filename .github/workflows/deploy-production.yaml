@@ -11,6 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          ref: main
           token: ${{ secrets.ACTIONS_CHECKOUT_PAT }}
       - run: sudo snap install yq
       - run: yq -i '.spec.template.spec.containers[0].image = "ghcr.io/${{ github.repository }}:${{ inputs.tag }}"' kustomize/prod/deployment.yaml
