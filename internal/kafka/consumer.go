@@ -1,26 +1,41 @@
 package kafka
 
 import (
+	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/google/uuid"
 	"github.com/third-place/user-service/internal/db"
 	"github.com/third-place/user-service/internal/model"
 	"github.com/third-place/user-service/internal/repository"
-	"github.com/google/uuid"
 	"log"
 )
 
 func InitializeAndRunLoop() {
 	userRepository := repository.CreateUserRepository(db.CreateDefaultConnection())
-	err := loopKafkaReader(userRepository)
+	err := loopConsumer(userRepository)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func loopKafkaReader(userRepository *repository.UserRepository) error {
-	reader := GetReader()
+func createConsumer() *kafka.Consumer {
+	cfg := createConnectionConfig()
+	_ = cfg.SetKey("group.id", "user-service")
+	_ = cfg.SetKey("auto.offset.reset", "earliest")
+	c, err := kafka.NewConsumer(cfg)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_ = c.SubscribeTopics([]string{"images"}, nil)
+	return c
+}
+
+func loopConsumer(userRepository *repository.UserRepository) error {
+	consumer := createConsumer()
 	for {
 		log.Print("kafka ready to consume messages")
-		data, err := reader.ReadMessage(-1)
+		data, err := consumer.ReadMessage(-1)
 		if err != nil {
 			log.Print(err)
 			return nil
