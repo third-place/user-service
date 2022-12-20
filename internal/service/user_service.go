@@ -60,7 +60,7 @@ func (s *UserService) GetUserFromUsername(username string) (*model.User, error) 
 	if err != nil {
 		return nil, err
 	}
-	return mapper.MapUserEntityToUser(userEntity), nil
+	return mapper.MapUserEntityToModel(userEntity), nil
 }
 
 func (s *UserService) GetUserFromUuid(userUuid uuid.UUID) (*model.User, error) {
@@ -68,7 +68,7 @@ func (s *UserService) GetUserFromUuid(userUuid uuid.UUID) (*model.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	return mapper.MapUserEntityToUser(userEntity), nil
+	return mapper.MapUserEntityToModel(userEntity), nil
 }
 
 func (s *UserService) CreateUser(newUser *model.NewUser) (*model.User, error) {
@@ -213,7 +213,7 @@ func (s *UserService) GetSession(sessionToken *model.SessionToken) (*model.Sessi
 	if err != nil {
 		return nil, err
 	}
-	return model.CreateSession(mapper.MapUserEntityToUser(user), sessionToken.Token), nil
+	return model.CreateSession(mapper.MapUserEntityToModel(user), sessionToken.Token), nil
 }
 
 func (s *UserService) RefreshSession(sessionToken *model.SessionToken) (*model.SessionToken, error) {
