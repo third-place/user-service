@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: otto-user-service
-          image: ghcr.io/third-place/user-service:v0.1.24-1
+          image: ghcr.io/third-place/user-service:v0.1.25
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
