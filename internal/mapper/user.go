@@ -12,7 +12,6 @@ func MapUserEntityToModel(user *entity.User) *model.User {
 		Name:          user.Name,
 		Username:      user.Username,
 		Email:         user.Email,
-		Password:      user.Password,
 		ProfilePic:    user.ProfilePic,
 		Role:          model.Role(user.Role),
 		IsBanned:      user.IsBanned,
