@@ -1,5 +1,5 @@
 /*
- * Otto user service
+ * User service
  */
 
 package main
