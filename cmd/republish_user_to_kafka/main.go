@@ -7,7 +7,6 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/third-place/user-service/internal/db"
 	kafka2 "github.com/third-place/user-service/internal/kafka"
-	"github.com/third-place/user-service/internal/mapper"
 	"github.com/third-place/user-service/internal/repository"
 	"log"
 	"os"
@@ -29,11 +28,7 @@ func main() {
 	if err != nil {
 		log.Fatal("no user found")
 	}
-	println("updating user found")
-	user.Role = os.Args[2]
-	userRepository.Save(user)
-	userModel := mapper.MapUserEntityToModel(user)
-	userData, _ := json.Marshal(userModel)
+	userData, _ := json.Marshal(user)
 	topic := "users"
 	println("sending to kafka")
 	err = kafkaWriter.Produce(
