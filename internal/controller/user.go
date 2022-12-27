@@ -1,8 +1,7 @@
 package controller
 
 import (
-	"encoding/json"
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"github.com/third-place/user-service/internal/db"
 	"github.com/third-place/user-service/internal/model"
 	"github.com/third-place/user-service/internal/repository"
@@ -13,178 +12,170 @@ import (
 )
 
 // CreateNewUserV1 - Create a new user
-func CreateNewUserV1(w http.ResponseWriter, r *http.Request) {
-	newUserModel, err := model.DecodeRequestToNewUser(r)
+func CreateNewUserV1(c *gin.Context) {
+	newUserModel, err := model.DecodeRequestToNewUser(c.Request)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 		return
 	}
 	user, err := service.CreateUserService().CreateUser(newUserModel)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
 		if _, ok := err.(*util.InputFieldError); ok {
-			data, _ := json.Marshal(err)
-			_, _ = w.Write(data)
+			c.JSON(http.StatusBadRequest, err)
 			return
 		}
-		_, _ = w.Write([]byte(err.Error()))
+		c.Status(http.StatusBadRequest)
 		return
 	}
-	w.WriteHeader(http.StatusCreated)
-	data, _ := json.Marshal(user)
-	_, _ = w.Write(data)
+	c.JSON(http.StatusCreated, user)
 }
 
 // GetUserByUsernameV1 - Get a user by username
-func GetUserByUsernameV1(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Cache-Control", "max-age=30")
-	params := mux.Vars(r)
-	username := params["username"]
+func GetUserByUsernameV1(c *gin.Context) {
+	c.Header("Cache-Control", "max-age=30")
+	username := c.Param("username")
 
 	user, err := service.CreateUserService().GetUserFromUsername(username)
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
+		c.Status(http.StatusNotFound)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	data, _ := json.Marshal(user)
-	_, _ = w.Write(data)
+	c.JSON(http.StatusOK, user)
 
 }
 
 // UpdateUserV1 - Update a user
-func UpdateUserV1(w http.ResponseWriter, r *http.Request) {
-	userModel, err := model.DecodeRequestToUser(r)
+func UpdateUserV1(c *gin.Context) {
+	userModel, err := model.DecodeRequestToUser(c.Request)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 		return
 	}
 	userService := service.CreateUserService()
-	sessionToken := getSessionToken(r)
+	sessionToken := getSessionToken(c)
 	sessionModel := &model.SessionToken{
 		Token: sessionToken,
 	}
 	session, err := userService.GetSession(sessionModel)
 	if err != nil {
-		w.WriteHeader(http.StatusForbidden)
+		c.Status(http.StatusForbidden)
 		return
 	}
 	err = userService.UpdateUser(session, userModel)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	data, _ := json.Marshal(userModel)
-	_, _ = w.Write(data)
+	c.JSON(http.StatusOK, userModel)
 }
 
 // BanUserV1 - ban a user
-func BanUserV1(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	usernameParam := params["username"]
+func BanUserV1(c *gin.Context) {
+	usernameParam, success := c.Params.Get("username")
+	if !success {
+		return
+	}
 	userService := service.CreateUserService()
 	userRepository := repository.CreateUserRepository(db.CreateDefaultConnection())
-	sessionToken := getSessionToken(r)
+	sessionToken := getSessionToken(c)
 	sessionModel := &model.SessionToken{
 		Token: sessionToken,
 	}
 	session, err := userService.GetSession(sessionModel)
 	if err != nil {
 		log.Print("error 0 :: ", err.Error())
-		w.WriteHeader(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 		return
 	}
 	sessionUser, err := userRepository.GetUserFromUsername(session.User.Username)
 	if err != nil || sessionUser.IsBanned {
 		log.Print("error 1 :: ", err.Error())
 		log.Print("sessionUser isBanned :: ", sessionUser.IsBanned)
-		w.WriteHeader(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 		return
 	}
 	userEntity, err := userRepository.GetUserFromUsername(usernameParam)
 	if err != nil {
 		log.Print("error 2 :: ", err.Error())
-		w.WriteHeader(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 		return
 	}
 	err = userService.BanUser(sessionUser, userEntity)
 	if err != nil {
 		log.Print("error 3 :: ", err.Error())
-		w.WriteHeader(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 	}
 }
 
 // UnbanUserV1 - ban a user
-func UnbanUserV1(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	usernameParam := params["username"]
+func UnbanUserV1(c *gin.Context) {
+	usernameParam := c.Param("username")
 	userService := service.CreateUserService()
 	userRepository := repository.CreateUserRepository(db.CreateDefaultConnection())
-	sessionToken := getSessionToken(r)
+	sessionToken := getSessionToken(c)
 	sessionModel := &model.SessionToken{
 		Token: sessionToken,
 	}
 	session, err := userService.GetSession(sessionModel)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 		return
 	}
 	sessionUser, err := userRepository.GetUserFromUsername(session.User.Username)
 	if err != nil || sessionUser.IsBanned {
-		w.WriteHeader(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 		return
 	}
 	userEntity, err := userRepository.GetUserFromUsername(usernameParam)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 		return
 	}
 	err = userService.UnbanUser(sessionUser, userEntity)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 	}
 }
 
 // SubmitOTPV1 - Submit a new OTP
-func SubmitOTPV1(w http.ResponseWriter, r *http.Request) {
-	otpModel, err := model.DecodeRequestToOtp(r)
+func SubmitOTPV1(c *gin.Context) {
+	otpModel, err := model.DecodeRequestToOtp(c.Request)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 		return
 	}
 	err = service.CreateUserService().SubmitOTP(otpModel)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 	}
 }
 
 // SubmitForgotPasswordV1 - Submit a forgot password request
-func SubmitForgotPasswordV1(w http.ResponseWriter, r *http.Request) {
-	userModel, err := model.DecodeRequestToUser(r)
+func SubmitForgotPasswordV1(c *gin.Context) {
+	userModel, err := model.DecodeRequestToUser(c.Request)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 		return
 	}
 	err = service.CreateUserService().ForgotPassword(userModel)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 	}
 }
 
 // ConfirmForgotPasswordV1 - Submit a forgot password request
-func ConfirmForgotPasswordV1(w http.ResponseWriter, r *http.Request) {
-	otpModel, err := model.DecodeRequestToOtp(r)
+func ConfirmForgotPasswordV1(c *gin.Context) {
+	otpModel, err := model.DecodeRequestToOtp(c.Request)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 		return
 	}
 	err = service.CreateUserService().ConfirmForgotPassword(otpModel)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 	}
 }
 
-func getSessionToken(r *http.Request) string {
-	return r.Header.Get("x-session-token")
+func getSessionToken(c *gin.Context) string {
+	return c.GetHeader("x-session-token")
 }

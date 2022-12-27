@@ -12,152 +12,146 @@ package internal
 import (
 	"github.com/third-place/user-service/internal/controller"
 	"net/http"
-	"strings"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 )
 
+// Route is the information for every URI.
 type Route struct {
-	Name        string
-	Method      string
-	Pattern     string
-	HandlerFunc http.HandlerFunc
+	// Name is the name of this Route.
+	Name string
+	// Method is the string for the HTTP method. ex) GET, POST etc..
+	Method string
+	// Pattern is the pattern of the URI.
+	Pattern string
+	// HandlerFunc is the handler function of this route.
+	HandlerFunc gin.HandlerFunc
 }
 
+// Routes is the list of the generated Route.
 type Routes []Route
 
-func NewRouter() *mux.Router {
-	router := mux.NewRouter().StrictSlash(true)
+// NewRouter returns a new router.
+func NewRouter() *gin.Engine {
+	router := gin.Default()
 	for _, route := range routes {
-		var handler http.Handler
-		handler = route.HandlerFunc
-		handler = Logger(handler, route.Name)
-
-		router.
-			Methods(route.Method).
-			Path(route.Pattern).
-			Name(route.Name).
-			Handler(handler)
+		switch route.Method {
+		case http.MethodGet:
+			router.GET(route.Pattern, route.HandlerFunc)
+		case http.MethodPost:
+			router.POST(route.Pattern, route.HandlerFunc)
+		case http.MethodPut:
+			router.PUT(route.Pattern, route.HandlerFunc)
+		case http.MethodPatch:
+			router.PATCH(route.Pattern, route.HandlerFunc)
+		case http.MethodDelete:
+			router.DELETE(route.Pattern, route.HandlerFunc)
+		}
 	}
 
 	return router
 }
 
-func Index(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Hello world!"))
+// Index is the index handler.
+func Index(c *gin.Context) {
+	c.String(http.StatusOK, "Hello World!")
 }
 
 var routes = Routes{
 	{
-		"BanUserV1",
-		strings.ToUpper("Post"),
-		"/ban/{username}",
-		controller.BanUserV1,
-	},
-
-	{
-		"ConfirmForgotPasswordV1",
-		strings.ToUpper("Put"),
-		"/forgot-password",
-		controller.ConfirmForgotPasswordV1,
-	},
-
-	{
 		"Index",
-		"GET",
+		http.MethodGet,
 		"/",
 		Index,
 	},
 
 	{
-		"CreateGroupV1",
-		strings.ToUpper("Post"),
-		"/group",
-		CreateGroupV1,
+		"BanUserV1",
+		http.MethodPost,
+		"/ban/:username",
+		controller.BanUserV1,
+	},
+
+	{
+		"ConfirmForgotPasswordV1",
+		http.MethodPut,
+		"/forgot-password",
+		controller.ConfirmForgotPasswordV1,
 	},
 
 	{
 		"CreateInviteV1",
-		strings.ToUpper("Post"),
+		http.MethodPost,
 		"/invite",
 		controller.CreateInviteV1,
 	},
 
 	{
+		"CreateNewSesssion",
+		http.MethodPost,
+		"/session",
+		controller.CreateNewSessionV1,
+	},
+
+	{
 		"CreateNewUser",
-		strings.ToUpper("Post"),
+		http.MethodPost,
 		"/user",
 		controller.CreateNewUserV1,
 	},
 
 	{
-		"GetGroupV1",
-		strings.ToUpper("Get"),
-		"/group",
-		GetGroupV1,
-	},
-
-	{
 		"GetInvitesV1",
-		strings.ToUpper("Get"),
+		http.MethodGet,
 		"/invite",
 		controller.GetInvitesV1,
 	},
 
 	{
+		"GetSession",
+		http.MethodGet,
+		"/session",
+		controller.GetSessionV1,
+	},
+
+	{
 		"GetUserByUsernameV1",
-		strings.ToUpper("Get"),
-		"/user/{username}",
+		http.MethodGet,
+		"/user/:username",
 		controller.GetUserByUsernameV1,
 	},
 
 	{
-		"CreateNewSession",
-		strings.ToUpper("Post"),
+		"RefreshSessionV1",
+		http.MethodPut,
 		"/session",
-		controller.CreateSessionV1,
+		controller.RefreshSessionV1,
 	},
 
 	{
-		"SubmitForgotPassword",
-		strings.ToUpper("Post"),
+		"SubmitForgotPasswordV1",
+		http.MethodPost,
 		"/forgot-password",
 		controller.SubmitForgotPasswordV1,
 	},
 
 	{
 		"SubmitOTPV1",
-		strings.ToUpper("Post"),
+		http.MethodPost,
 		"/otp",
 		controller.SubmitOTPV1,
 	},
 
 	{
-		"GetSession",
-		strings.ToUpper("Get"),
-		"/session",
-		controller.GetSessionV1,
-	},
-
-	{
-		"RefreshSession",
-		strings.ToUpper("Put"),
-		"/session",
-		controller.RefreshSessionV1,
-	},
-
-	{
 		"UnbanUserV1",
-		strings.ToUpper("Delete"),
-		"/ban/{username}",
+		http.MethodDelete,
+		"/ban/:username",
 		controller.UnbanUserV1,
 	},
 
 	{
 		"UpdateUserV1",
-		strings.ToUpper("Put"),
+		http.MethodPut,
 		"/user",
 		controller.UpdateUserV1,
 	},

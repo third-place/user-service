@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"github.com/third-place/user-service/internal/model"
 	"github.com/third-place/user-service/internal/service"
 	"github.com/third-place/user-service/internal/util"
@@ -16,15 +16,15 @@ func init() {
 }
 
 // CreateInviteV1 -- create new invites for new users
-func CreateInviteV1(w http.ResponseWriter, r *http.Request) {
+func CreateInviteV1(c *gin.Context) {
 	userService := service.CreateUserService()
-	sessionToken := getSessionToken(r)
+	sessionToken := getSessionToken(c)
 	sessionModel := &model.SessionToken{
 		Token: sessionToken,
 	}
 	session, err := userService.GetSession(sessionModel)
 	if err != nil || session.User.Role == model.USER {
-		w.WriteHeader(http.StatusForbidden)
+		c.Status(http.StatusForbidden)
 		return
 	}
 	code := util.GenerateCode()
@@ -37,32 +37,30 @@ func CreateInviteV1(w http.ResponseWriter, r *http.Request) {
 		code = util.GenerateCode()
 		attempt += 1
 		if attempt > 5 {
-			w.WriteHeader(http.StatusInternalServerError)
+			c.Status(http.StatusInternalServerError)
 			return
 		}
 	}
 	invite, err := userService.CreateInviteFromCode(code)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		c.Status(http.StatusInternalServerError)
 		return
 	}
-	data, _ := json.Marshal(invite)
-	_, _ = w.Write(data)
+	c.JSON(http.StatusOK, invite)
 }
 
 // GetInvitesV1 -- get a list of invites
-func GetInvitesV1(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query()
+func GetInvitesV1(c *gin.Context) {
+	query := c.Param("offset")
 	offset := 0
-	if value := query.Get("offset"); value != "" {
+	if value := query; value != "" {
 		offset, err := strconv.Atoi(value)
 		if err != nil || offset < 0 || offset > 100 {
-			w.WriteHeader(http.StatusBadRequest)
+			c.Status(http.StatusBadRequest)
 			return
 		}
 	}
 	userService := service.CreateUserService()
 	invites := userService.GetInvites(offset)
-	data, _ := json.Marshal(invites)
-	_, _ = w.Write(data)
+	c.JSON(http.StatusOK, invites)
 }

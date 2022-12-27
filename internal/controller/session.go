@@ -1,56 +1,45 @@
 package controller
 
 import (
-	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"github.com/third-place/user-service/internal/model"
 	"github.com/third-place/user-service/internal/service"
-	"log"
 	"net/http"
 )
 
-// CreateSessionV1 - Create a new session
-func CreateSessionV1(w http.ResponseWriter, r *http.Request) {
-	newSessionModel, err := model.DecodeRequestToNewSession(r)
+// CreateNewSessionV1 - Create a new session
+func CreateNewSessionV1(c *gin.Context) {
+	newSessionModel, err := model.DecodeRequestToNewSession(c.Request)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 		return
 	}
 	result, err := service.CreateUserService().CreateSession(newSessionModel)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		data, _ := json.Marshal(err)
-		_, _ = w.Write(data)
+		c.JSON(http.StatusBadRequest, err)
 		return
 	}
-	w.WriteHeader(http.StatusCreated)
-	data, _ := json.Marshal(result)
-	_, _ = w.Write(data)
+	c.JSON(http.StatusCreated, result)
 }
 
 // GetSessionV1 - validate a session token
-func GetSessionV1(w http.ResponseWriter, r *http.Request) {
-	sessionToken := model.DecodeRequestToSessionToken(r)
+func GetSessionV1(c *gin.Context) {
+	sessionToken := model.DecodeRequestToSessionToken(c.Request)
 	session, err := service.CreateUserService().GetSession(sessionToken)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		log.Print("sanity: ", sessionToken.Token)
-		log.Print(err)
+		c.Status(http.StatusUnauthorized)
 		return
 	}
-	data, _ := json.Marshal(session)
-	_, _ = w.Write(data)
+	c.JSON(http.StatusOK, session)
 }
 
 // RefreshSessionV1 - refresh a session token
-func RefreshSessionV1(w http.ResponseWriter, r *http.Request) {
-	sessionToken := model.DecodeRequestToSessionToken(r)
+func RefreshSessionV1(c *gin.Context) {
+	sessionToken := model.DecodeRequestToSessionToken(c.Request)
 	session, err := service.CreateUserService().RefreshSession(sessionToken)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		log.Print("sanity: ", sessionToken.Token)
-		log.Print(err)
+		c.Status(http.StatusBadRequest)
 		return
 	}
-	data, _ := json.Marshal(session)
-	_, _ = w.Write(data)
+	c.JSON(http.StatusOK, session)
 }

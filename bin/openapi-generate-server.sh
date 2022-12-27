@@ -1,1 +1,1 @@
-openapi-generator generate -i api.yaml -g go-server -o build/models/
+openapi-generator generate -i api.yaml -g go-gin-server -o build/models/

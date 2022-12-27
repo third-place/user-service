@@ -5,7 +5,7 @@ info:
 paths:
   /user:
     post:
-      operationId: createNewUser
+      operationId: createNewUserV1
       summary: Create a new user
       requestBody:
         description: user to create
@@ -53,7 +53,7 @@ paths:
                 $ref: "#/components/schemas/User"
   /session:
     post:
-      operationId: createNewSesssion
+      operationId: createNewSessionV1
       summary: Create a new user session
       requestBody:
         description: session to create
@@ -71,7 +71,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Session"
     get:
-      operationId: getSession
+      operationId: getSessionV1
       summary: Get a session
       parameters:
         - in: query
