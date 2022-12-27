@@ -34,7 +34,6 @@ func CreateNewUserV1(c *gin.Context) {
 func GetUserByUsernameV1(c *gin.Context) {
 	c.Header("Cache-Control", "max-age=30")
 	username := c.Param("username")
-
 	user, err := service.CreateUserService().GetUserFromUsername(username)
 	if err != nil {
 		c.Status(http.StatusNotFound)
@@ -52,10 +51,7 @@ func UpdateUserV1(c *gin.Context) {
 		return
 	}
 	userService := service.CreateUserService()
-	sessionToken := getSessionToken(c)
-	sessionModel := &model.SessionToken{
-		Token: sessionToken,
-	}
+	sessionModel := util.GetSessionTokenModel(c)
 	session, err := userService.GetSession(sessionModel)
 	if err != nil {
 		c.Status(http.StatusForbidden)
@@ -77,10 +73,7 @@ func BanUserV1(c *gin.Context) {
 	}
 	userService := service.CreateUserService()
 	userRepository := repository.CreateUserRepository(db.CreateDefaultConnection())
-	sessionToken := getSessionToken(c)
-	sessionModel := &model.SessionToken{
-		Token: sessionToken,
-	}
+	sessionModel := util.GetSessionTokenModel(c)
 	session, err := userService.GetSession(sessionModel)
 	if err != nil {
 		log.Print("error 0 :: ", err.Error())
@@ -112,10 +105,7 @@ func UnbanUserV1(c *gin.Context) {
 	usernameParam := c.Param("username")
 	userService := service.CreateUserService()
 	userRepository := repository.CreateUserRepository(db.CreateDefaultConnection())
-	sessionToken := getSessionToken(c)
-	sessionModel := &model.SessionToken{
-		Token: sessionToken,
-	}
+	sessionModel := util.GetSessionTokenModel(c)
 	session, err := userService.GetSession(sessionModel)
 	if err != nil {
 		c.Status(http.StatusBadRequest)
@@ -174,8 +164,4 @@ func ConfirmForgotPasswordV1(c *gin.Context) {
 	if err != nil {
 		c.Status(http.StatusBadRequest)
 	}
-}
-
-func getSessionToken(c *gin.Context) string {
-	return c.GetHeader("x-session-token")
 }
