@@ -25,6 +25,14 @@ func MapUserEntityToModel(user *entity.User) *model.User {
 	}
 }
 
+func MapUserEntitiesToModels(users []*entity.User) []*model.User {
+	userModels := make([]*model.User, len(users))
+	for i, v := range users {
+		userModels[i] = MapUserEntityToModel(v)
+	}
+	return userModels
+}
+
 func MapNewUserModelToEntity(user *model.NewUser) *entity.User {
 	pass, _ := util.HashPassword(user.Password)
 	return &entity.User{

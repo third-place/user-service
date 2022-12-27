@@ -40,7 +40,24 @@ func GetUserByUsernameV1(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, user)
+}
 
+// GetUsersV1 - Get a list of users
+func GetUsersV1(c *gin.Context) {
+	offset, err := util.GetOffsetParam(c)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+	userService := service.CreateUserService()
+	session, err := userService.GetSession(util.GetSessionTokenModel(c))
+	if err != nil || session.User.Role == model.USER {
+		c.Status(http.StatusForbidden)
+		return
+	}
+	c.Header("Cache-Control", "max-age=30")
+	users := service.CreateUserService().GetUsers(offset)
+	c.JSON(http.StatusOK, users)
 }
 
 // UpdateUserV1 - Update a user

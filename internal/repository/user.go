@@ -51,6 +51,17 @@ func (r *UserRepository) GetUserFromSessionToken(token string) (*entity.User, er
 	return user, nil
 }
 
+func (r *UserRepository) GetUsers(offset int) []*entity.User {
+	var users []*entity.User
+	r.conn.Table("users").
+		Where("users.deleted_at IS NULL").
+		Order("id desc").
+		Limit(25).
+		Offset(offset).
+		Find(&users)
+	return users
+}
+
 func (r *UserRepository) Create(user *entity.User) *gorm.DB {
 	return r.conn.Create(user)
 }

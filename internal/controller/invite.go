@@ -7,7 +7,6 @@ import (
 	"github.com/third-place/user-service/internal/util"
 	"math/rand"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -53,14 +52,10 @@ func GetInvitesV1(c *gin.Context) {
 		c.Status(http.StatusForbidden)
 		return
 	}
-	query := c.Param("offset")
-	offset := 0
-	if value := query; value != "" {
-		offset, err := strconv.Atoi(value)
-		if err != nil || offset < 0 || offset > 100 {
-			c.Status(http.StatusBadRequest)
-			return
-		}
+	offset, err := util.GetOffsetParam(c)
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
 	}
 	invites := userService.GetInvites(offset)
 	c.JSON(http.StatusOK, invites)

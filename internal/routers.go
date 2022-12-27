@@ -122,6 +122,13 @@ var routes = Routes{
 	},
 
 	{
+		"GetUsersV1",
+		http.MethodGet,
+		"/user",
+		controller.GetUsersV1,
+	},
+
+	{
 		"RefreshSessionV1",
 		http.MethodPut,
 		"/session",

@@ -63,6 +63,11 @@ func (s *UserService) GetUserFromUsername(username string) (*model.User, error) 
 	return mapper.MapUserEntityToModel(userEntity), nil
 }
 
+func (s *UserService) GetUsers(offset int) []*model.User {
+	userEntities := s.userRepository.GetUsers(offset)
+	return mapper.MapUserEntitiesToModels(userEntities)
+}
+
 func (s *UserService) GetUserFromUuid(userUuid uuid.UUID) (*model.User, error) {
 	userEntity, err := s.userRepository.GetUserFromUuid(userUuid)
 	if err != nil {

@@ -1,9 +1,27 @@
 openapi: "3.0.0"
 info:
-  title: Otto user service
+  title: Third place user service
   version: "1.0"
 paths:
   /user:
+    get:
+      operationId: getUsersV1
+      summary: Get users
+      parameters:
+      - in: query
+        name: offset
+        description: a number, offset from beginning
+        schema:
+          type: string
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
     post:
       operationId: createNewUserV1
       summary: Create a new user
