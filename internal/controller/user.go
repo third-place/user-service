@@ -7,7 +7,6 @@ import (
 	"github.com/third-place/user-service/internal/repository"
 	"github.com/third-place/user-service/internal/service"
 	"github.com/third-place/user-service/internal/util"
-	"log"
 	"net/http"
 )
 
@@ -32,6 +31,11 @@ func CreateNewUserV1(c *gin.Context) {
 
 // GetUserByUsernameV1 - Get a user by username
 func GetUserByUsernameV1(c *gin.Context) {
+	_, err := service.CreateUserService().GetSession(util.GetSessionTokenModel(c))
+	if err != nil {
+		c.Status(http.StatusForbidden)
+		return
+	}
 	c.Header("Cache-Control", "max-age=30")
 	username := c.Param("username")
 	user, err := service.CreateUserService().GetUserFromUsername(username)
@@ -44,12 +48,17 @@ func GetUserByUsernameV1(c *gin.Context) {
 
 // GetUsersV1 - Get a list of users
 func GetUsersV1(c *gin.Context) {
+	userService := service.CreateUserService()
+	_, err := userService.GetSession(util.GetSessionTokenModel(c))
+	if err != nil {
+		c.Status(http.StatusForbidden)
+		return
+	}
 	offset, err := util.GetOffsetParam(c)
 	if err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}
-	userService := service.CreateUserService()
 	session, err := userService.GetSession(util.GetSessionTokenModel(c))
 	if err != nil || session.User.Role == model.USER {
 		c.Status(http.StatusForbidden)
@@ -93,26 +102,21 @@ func BanUserV1(c *gin.Context) {
 	sessionModel := util.GetSessionTokenModel(c)
 	session, err := userService.GetSession(sessionModel)
 	if err != nil {
-		log.Print("error 0 :: ", err.Error())
 		c.Status(http.StatusBadRequest)
 		return
 	}
 	sessionUser, err := userRepository.GetUserFromUsername(session.User.Username)
 	if err != nil || sessionUser.IsBanned {
-		log.Print("error 1 :: ", err.Error())
-		log.Print("sessionUser isBanned :: ", sessionUser.IsBanned)
 		c.Status(http.StatusBadRequest)
 		return
 	}
 	userEntity, err := userRepository.GetUserFromUsername(usernameParam)
 	if err != nil {
-		log.Print("error 2 :: ", err.Error())
 		c.Status(http.StatusBadRequest)
 		return
 	}
 	err = userService.BanUser(sessionUser, userEntity)
 	if err != nil {
-		log.Print("error 3 :: ", err.Error())
 		c.Status(http.StatusBadRequest)
 	}
 }
