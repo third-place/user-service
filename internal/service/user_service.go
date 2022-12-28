@@ -196,6 +196,7 @@ func (s *UserService) CreateSession(newSession *model.NewSession) (*model.Sessio
 	}
 	return &model.Session{
 		Token: token,
+		User:  mapper.MapUserEntityToModel(search),
 	}, nil
 }
 

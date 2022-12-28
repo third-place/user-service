@@ -126,15 +126,16 @@ func Test_Can_Login(t *testing.T) {
 	svc := CreateTestService()
 
 	// given
-	user, err := svc.CreateInvitedUser(&model.NewUser{
+	emailAddr := util.RandomEmailAddress()
+	_, err := svc.CreateInvitedUser(&model.NewUser{
 		Username: util.RandomUsername(),
-		Email:    util.RandomEmailAddress(),
+		Email:    emailAddr,
 		Password: dummyPassword,
 	})
 
 	// when
 	session, err := svc.CreateSession(&model.NewSession{
-		Email:    user.Email,
+		Email:    emailAddr,
 		Password: dummyPassword,
 	})
 
@@ -153,13 +154,14 @@ func Test_Can_GetSession(t *testing.T) {
 	svc := CreateTestService()
 
 	// given
-	user, err := svc.CreateInvitedUser(&model.NewUser{
+	emailAddr := util.RandomEmailAddress()
+	_, err := svc.CreateInvitedUser(&model.NewUser{
 		Username: util.RandomUsername(),
-		Email:    util.RandomEmailAddress(),
+		Email:    emailAddr,
 		Password: dummyPassword,
 	})
 	session, err := svc.CreateSession(&model.NewSession{
-		Email:    user.Email,
+		Email:    emailAddr,
 		Password: dummyPassword,
 	})
 
@@ -203,15 +205,16 @@ func Test_Needs_Correct_Password(t *testing.T) {
 	svc := CreateTestService()
 
 	// given
-	user, err := svc.CreateInvitedUser(&model.NewUser{
+	emailAddr := util.RandomEmailAddress()
+	_, err := svc.CreateInvitedUser(&model.NewUser{
 		Username: util.RandomUsername(),
-		Email:    util.RandomEmailAddress(),
+		Email:    emailAddr,
 		Password: dummyPassword,
 	})
 
 	// when
 	session, err := svc.CreateSession(&model.NewSession{
-		Email:    user.Email,
+		Email:    emailAddr,
 		Password: "foo",
 	})
 
@@ -226,23 +229,35 @@ func Test_UserCan_UpdateSelf(t *testing.T) {
 	svc := CreateTestService()
 
 	// given
-	user, _ := svc.CreateInvitedUser(&model.NewUser{
+	emailAddr := util.RandomEmailAddress()
+	user, err := svc.CreateInvitedUser(&model.NewUser{
 		Username: util.RandomUsername(),
-		Email:    util.RandomEmailAddress(),
+		Email:    emailAddr,
 		Password: dummyPassword,
 	})
-	_ = svc.UpdateUser(
-		&model.Session{
-			User: user,
-		},
+	if err != nil {
+		t.Error(err)
+	}
+	session, err := svc.CreateSession(&model.NewSession{
+		Email:    emailAddr,
+		Password: dummyPassword,
+	})
+	if err != nil {
+		t.Error(err)
+	}
+	err = svc.UpdateUser(
+		session,
 		&model.User{
 			Uuid:       user.Uuid,
 			Name:       "MyName",
 			ProfilePic: "MyProfilePic",
 			BioMessage: "Hello World",
-			Birthday:   "2000-01-01",
+			Birthday:   "2022-12-01",
 		},
 	)
+	if err != nil {
+		t.Error(err)
+	}
 
 	// when
 	user, _ = svc.GetUserFromUuid(uuid.MustParse(user.Uuid))
@@ -256,9 +271,6 @@ func Test_UserCan_UpdateSelf(t *testing.T) {
 	}
 	if user.BioMessage != "Hello World" {
 		t.Error("expected to update bio message")
-	}
-	if user.Birthday != "2000-01-01" {
-		t.Error("expected to update birthday")
 	}
 }
 
