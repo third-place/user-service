@@ -334,7 +334,10 @@ func (s *UserService) GetInvite(code string) (*model.Invite, error) {
 	return mapper.MapInviteEntityToModel(invite), nil
 }
 
-func (s *UserService) CreateInviteFromCode(code string) (*model.Invite, error) {
+func (s *UserService) CreateInviteFromCode(session *model.Session, code string) (*model.Invite, error) {
+	if !s.securityService.IsModerator(session) {
+		return nil, errors.New("not allowed")
+	}
 	invite := &entity.Invite{
 		Code: code,
 	}

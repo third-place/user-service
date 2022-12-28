@@ -2,7 +2,6 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/third-place/user-service/internal/model"
 	"github.com/third-place/user-service/internal/service"
 	"github.com/third-place/user-service/internal/util"
 	"math/rand"
@@ -17,8 +16,8 @@ func init() {
 // CreateInviteV1 -- create new invites for new users
 func CreateInviteV1(c *gin.Context) {
 	userService := service.CreateUserService()
-	session, err := userService.GetSession(util.GetSessionTokenModel(c))
-	if err != nil || session.User.Role == model.USER {
+	session, err := util.GetSession(c)
+	if err != nil {
 		c.Status(http.StatusForbidden)
 		return
 	}
@@ -36,9 +35,9 @@ func CreateInviteV1(c *gin.Context) {
 			return
 		}
 	}
-	invite, err := userService.CreateInviteFromCode(code)
+	invite, err := userService.CreateInviteFromCode(session, code)
 	if err != nil {
-		c.Status(http.StatusInternalServerError)
+		c.Status(http.StatusForbidden)
 		return
 	}
 	c.JSON(http.StatusOK, invite)
