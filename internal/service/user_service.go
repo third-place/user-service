@@ -348,17 +348,6 @@ func (s *UserService) CreateInviteFromCode(session *model.Session, code string) 
 	return mapper.MapInviteEntityToModel(invite), nil
 }
 
-func (s *UserService) CreateInvite() (*model.Invite, error) {
-	invite := &entity.Invite{
-		Code: util.GenerateCode(),
-	}
-	result := s.inviteRepository.Create(invite)
-	if result.Error != nil {
-		return nil, result.Error
-	}
-	return mapper.MapInviteEntityToModel(invite), nil
-}
-
 func (s *UserService) publishUserToKafka(userEntity *entity.User) error {
 	topic := "users"
 	userModel := mapper.MapUserEntityToModel(userEntity)

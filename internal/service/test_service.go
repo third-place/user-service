@@ -2,28 +2,35 @@ package service
 
 import (
 	"github.com/google/uuid"
+	"github.com/third-place/user-service/internal/entity"
+	"github.com/third-place/user-service/internal/mapper"
 	"github.com/third-place/user-service/internal/model"
+	"github.com/third-place/user-service/internal/repository"
+	"github.com/third-place/user-service/internal/util"
 )
 
 type TestService struct {
-	userService *UserService
+	userService      *UserService
+	inviteRepository *repository.InviteRepository
 }
 
 func CreateTestService() *TestService {
+	conn := util.SetupTestDatabase()
 	return &TestService{
-		userService: CreateTestUserService(),
+		userService:      CreateTestUserService(),
+		inviteRepository: repository.CreateInviteRepository(conn),
 	}
 }
 
 func (t *TestService) CreateInvitedUser(user *model.NewUser) (*model.User, error) {
-	inviteCode, _ := t.userService.CreateInvite()
+	inviteCode, _ := t.createInvite()
 	user.InviteCode = inviteCode.Code
 	user.Name = "foo"
 	return t.userService.CreateUser(user)
 }
 
 func (t *TestService) CreateInvite() (*model.Invite, error) {
-	return t.userService.CreateInvite()
+	return t.createInvite()
 }
 
 func (t *TestService) CreateUser(inviteCode *model.Invite, user *model.NewUser) (*model.User, error) {
@@ -50,4 +57,15 @@ func (t *TestService) CreateSession(newSession *model.NewSession) (*model.Sessio
 
 func (t *TestService) GetSession(sessionToken *model.SessionToken) (*model.Session, error) {
 	return t.userService.GetSession(sessionToken)
+}
+
+func (t *TestService) createInvite() (*model.Invite, error) {
+	invite := &entity.Invite{
+		Code: util.GenerateCode(),
+	}
+	result := t.inviteRepository.Create(invite)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return mapper.MapInviteEntityToModel(invite), nil
 }
