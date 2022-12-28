@@ -46,17 +46,16 @@ func CreateInviteV1(c *gin.Context) {
 
 // GetInvitesV1 -- get a list of invites
 func GetInvitesV1(c *gin.Context) {
-	userService := service.CreateUserService()
-	session, err := userService.GetSession(util.GetSessionTokenModel(c))
-	if err != nil || session.User.Role == model.USER {
-		c.Status(http.StatusForbidden)
-		return
-	}
+	session, err := util.GetSession(c)
 	offset, err := util.GetOffsetParam(c)
 	if err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}
-	invites := userService.GetInvites(offset)
+	invites, err := service.CreateUserService().GetInvites(session, offset)
+	if err != nil {
+		c.Status(http.StatusForbidden)
+		return
+	}
 	c.JSON(http.StatusOK, invites)
 }

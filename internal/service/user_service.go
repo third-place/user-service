@@ -13,7 +13,6 @@ import (
 	"github.com/third-place/user-service/internal/repository"
 	"github.com/third-place/user-service/internal/util"
 	"log"
-	"os"
 	"strings"
 	"time"
 )
@@ -23,9 +22,8 @@ type UserService struct {
 	inviteRepository *repository.InviteRepository
 	mailService      *MailService
 	kafkaWriter      kafka.Producer
+	securityService  *SecurityService
 }
-
-var jwtKey = []byte(os.Getenv("JWT_KEY"))
 
 func CreateTestUserService() *UserService {
 	conn := util.SetupTestDatabase()
@@ -38,6 +36,7 @@ func CreateTestUserService() *UserService {
 		repository.CreateInviteRepository(conn),
 		CreateTestMailService(),
 		writer,
+		CreateSecurityService(),
 	}
 }
 
@@ -52,6 +51,7 @@ func CreateUserService() *UserService {
 		repository.CreateInviteRepository(conn),
 		CreateMailService(),
 		writer,
+		CreateSecurityService(),
 	}
 }
 
@@ -202,7 +202,7 @@ func (s *UserService) CreateSession(newSession *model.NewSession) (*model.Sessio
 func (s *UserService) GetSession(sessionToken *model.SessionToken) (*model.Session, error) {
 	claims := &model.Claims{}
 	token, err := jwt.ParseWithClaims(sessionToken.Token, claims, func(token *jwt.Token) (interface{}, error) {
-		return jwtKey, nil
+		return util.JwtKey, nil
 	})
 	if err != nil {
 		return nil, err
@@ -224,7 +224,7 @@ func (s *UserService) GetSession(sessionToken *model.SessionToken) (*model.Sessi
 func (s *UserService) RefreshSession(sessionToken *model.SessionToken) (*model.SessionToken, error) {
 	claims := &model.Claims{}
 	token, err := jwt.ParseWithClaims(sessionToken.Token, claims, func(token *jwt.Token) (interface{}, error) {
-		return jwtKey, nil
+		return util.JwtKey, nil
 	})
 	if err != nil || !token.Valid {
 		return nil, err
@@ -235,7 +235,7 @@ func (s *UserService) RefreshSession(sessionToken *model.SessionToken) (*model.S
 	expirationTime := time.Now().Add(1 * time.Hour)
 	claims.ExpiresAt = jwt.NewNumericDate(expirationTime)
 	token = jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(jwtKey)
+	tokenString, err := token.SignedString(util.JwtKey)
 	return &model.SessionToken{
 		Token: tokenString,
 	}, nil
@@ -318,9 +318,12 @@ func (s *UserService) ConfirmForgotPassword(otp *model.Otp) error {
 	return nil
 }
 
-func (s *UserService) GetInvites(offset int) []*model.Invite {
+func (s *UserService) GetInvites(session *model.Session, offset int) ([]*model.Invite, error) {
+	if !s.securityService.IsModerator(session) {
+		return nil, errors.New("not allowed")
+	}
 	invites := s.inviteRepository.FindInvites(offset)
-	return mapper.MapInviteEntitiesToModels(invites)
+	return mapper.MapInviteEntitiesToModels(invites), nil
 }
 
 func (s *UserService) GetInvite(code string) (*model.Invite, error) {
@@ -376,7 +379,7 @@ func (s *UserService) canAdminister(sessionUser *entity.User, user *entity.User)
 func (s *UserService) getJWT(user *entity.User) (string, error) {
 	claims := model.NewClaims(user.Uuid)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(jwtKey)
+	tokenString, err := token.SignedString(util.JwtKey)
 	if err != nil {
 		return "", err
 	}
