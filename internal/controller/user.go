@@ -31,11 +31,6 @@ func CreateNewUserV1(c *gin.Context) {
 
 // GetUserByUsernameV1 - Get a user by username
 func GetUserByUsernameV1(c *gin.Context) {
-	_, err := service.CreateUserService().GetSession(util.GetSessionTokenModel(c))
-	if err != nil {
-		c.Status(http.StatusForbidden)
-		return
-	}
 	c.Header("Cache-Control", "max-age=30")
 	username := c.Param("username")
 	user, err := service.CreateUserService().GetUserFromUsername(username)
