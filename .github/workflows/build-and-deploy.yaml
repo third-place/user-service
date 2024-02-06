@@ -1,0 +1,19 @@
+on:
+  push:
+    branches:
+      - 'main'
+jobs:
+  run-tests:
+    uses: third-place/actions/.github/workflows/run-go-tests.yaml@main
+  publish-docker-image:
+    needs: run-tests
+    uses: third-place/actions/.github/workflows/publish-docker-image.yaml@main
+    secrets: inherit
+    with:
+      name: third-place/user-service
+      directory: .
+  deploy-service:
+    needs: publish-docker-image
+    uses: third-place/actions/.github/workflows/deploy-service.yaml@main
+    secrets:
+      PAT: ${{ secrets.CR_PAT }}
