@@ -3,8 +3,8 @@ package repository
 import (
 	"errors"
 	"github.com/google/uuid"
-	"github.com/jinzhu/gorm"
 	"github.com/third-place/user-service/internal/entity"
+	"gorm.io/gorm"
 )
 
 type UserRepository struct {
