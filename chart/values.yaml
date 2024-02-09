@@ -3,6 +3,7 @@ service:
   port: 8000
   targetPort: 8080
   postgresql:
+    enabled: true
     auth:
       username: user-service
       database: user-service
