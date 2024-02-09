@@ -2,10 +2,9 @@ service:
   enabled: true
   port: 8000
   targetPort: 8080
-  postgres:
-    enabled: true
+  postgresql:
     auth:
-      username: postgres_admin
+      username: user-service
       database: user-service
       existingSecret: postgres-password
   secrets:
