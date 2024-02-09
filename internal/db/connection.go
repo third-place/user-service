@@ -55,10 +55,10 @@ func CreateConnection(host string, port string, dbname string, user string, pass
 		}
 
 		err = db.AutoMigrate(
+			&entity.User{},
+			&entity.Password{},
 			&entity.Email{},
 			&entity.Invite{},
-			&entity.Password{},
-			&entity.User{},
 		)
 
 		if err != nil {
