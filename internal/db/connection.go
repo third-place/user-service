@@ -59,6 +59,12 @@ func CreateConnection(host string, port string, dbname string, user string, pass
 			log.Fatal(err)
 		}
 
+		_, err = sqlConnection.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\" WITH SCHEMA public;")
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		sqlConnection.SetMaxOpenConns(20)
 		sqlConnection.SetMaxIdleConns(5)
 		sqlConnection.SetConnMaxLifetime(time.Hour)
