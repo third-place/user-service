@@ -3,7 +3,7 @@ package repository
 import (
 	"errors"
 	"github.com/third-place/user-service/internal/entity"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type InviteRepository struct {
