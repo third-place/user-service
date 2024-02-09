@@ -41,17 +41,6 @@ func CreateConnection(host string, port string, dbname string, user string, pass
 			log.Fatal(err)
 		}
 
-		err = db.AutoMigrate(
-			&entity.Email{},
-			&entity.Invite{},
-			&entity.Password{},
-			&entity.User{},
-		)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		dbConn = db
 		sqlConnection, err := dbConn.DB()
 
@@ -60,6 +49,17 @@ func CreateConnection(host string, port string, dbname string, user string, pass
 		}
 
 		_, err = sqlConnection.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\" WITH SCHEMA public;")
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = db.AutoMigrate(
+			&entity.Email{},
+			&entity.Invite{},
+			&entity.Password{},
+			&entity.User{},
+		)
 
 		if err != nil {
 			log.Fatal(err)
