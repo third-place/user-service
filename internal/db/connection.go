@@ -2,8 +2,9 @@ package db
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/third-place/user-service/internal/entity"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"log"
 	"os"
 	"time"
@@ -23,19 +24,41 @@ func CreateDefaultConnection() *gorm.DB {
 func CreateConnection(host string, port string, dbname string, user string, password string) *gorm.DB {
 	if dbConn == nil {
 		db, err := gorm.Open(
-			"postgres",
-			fmt.Sprintf(
-				"host=%s port=%s dbname=%s user=%s password=%s sslmode=disable",
-				host,
-				port,
-				dbname,
-				user,
-				password))
+			postgres.Open(
+				fmt.Sprintf(
+					"host=%s port=%s dbname=%s user=%s password=%s sslmode=disable",
+					host,
+					port,
+					dbname,
+					user,
+					password,
+				),
+			),
+			&gorm.Config{},
+		)
+
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		err = db.AutoMigrate(
+			&entity.Email{},
+			&entity.Invite{},
+			&entity.Password{},
+			&entity.User{},
+		)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		dbConn = db
-		sqlConnection := dbConn.DB()
+		sqlConnection, err := dbConn.DB()
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		sqlConnection.SetMaxOpenConns(20)
 		sqlConnection.SetMaxIdleConns(5)
 		sqlConnection.SetConnMaxLifetime(time.Hour)
