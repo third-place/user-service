@@ -2,13 +2,10 @@ service:
   enabled: true
   port: 8000
   targetPort: 8080
+  secrets:
+    postgres-password: AgCm3n4fYZZg6R5EetgEmU1CbCPS7X3GvRr/+ZZehlw2iNx2OGC49UgihF7A2qbfA8X4vUFmF0C8WtRDzXUUT8aqw9uBY+ASb/ZQE7LvSGGWdm3/Tt8fxtTIIpID+usHD02H1ajBUqCRhdSgeTv4xXwllgQQ5X8WG6ltA6cPPyxr8WGhI/Dje4vm2xqs/6SAcGPBTh3fQmAtoQ49iV3IY+OVQoqHsjjeZ5DtwgdlQLzrAT3eDNdMac76Ts5WP3S6+th4hieXH5ZpVGHopc4TeFaeYG86tCBmCbp82P3dZjCabT2qKVz4ae90NZZLG+/xMVhoz+H+M/TtWiA237cD98nRVlm81Auf4xZmVzWv/BLxM/5zqh5m4JGcXLnVc+PAbN7Wy7mROs1ngMR1nDIgIwgACUnGUdHIJUWz3v2NCkyI2pmWizuH6H4/7YiNb05FX6it9vlgselV8otCVy9uP7CLXjrZ64tO+pJwQjt82+dsTSPg6lX/aNwQcc29t0imtp3hl5wM0iN9k387TCdr0jv0F+AxIALhZTOTnIUvV59Wt2/bDVyt2AU9c7YmS4mAqonuUMQgXMG4Pc9VpD9xK5i1vsYQABBgFThGNNbmSujXqqCQDIOGA5T6nhemZIJ1OtMJJjIuKKUpA9hX55XmNXiWy8lO7Tdjx/TAfb9qQe3yZGAeuEI+veyA42Vb+vqfFBUGzlj9KrWRYWciLvfIk29kOho1s9QF6gHgfRnM
   postgresql:
-    enabled: true
-    auth:
-      username: user-service
-      database: user-service
-      existingSecret: pg-user-secret
-      secretPassword: AgA44PCEjBXLZLN9BnBWSdNydI25EuwxTy6g3U4C6rVPECaTEfzchuTA/AuC2bbRnbM4bVtnU0RrRFPGGR6scg3NHKgUrQWTejXRP7U6xBgzoLUGqxqFbPgd5qsLGdinCRA7oOEvKJNKXtDoKtkIsLk9edIOvDQPb12Y/G/wgYY4NM7zmoxktNSui73Ap1+LzsmnvpXq4eU9+Fv/lvsvyyoVN3FAM5cLs8tETf2pGNB6K+cx6hUkuT/1xvMvDG+7p5CLMu2Nw8/X5ZPf1ueQJ0uf47Ce4AgCldgXc9WvxCbbIqUcJqdpHC55mCFxEC/G8JlX+WdfdsKiA/8v0cxYe96l5kQfRhuZJWQ1z+Schw2KhjaL7G4tfsokZ53mlPKL7yDC0aZB5V6szEUTtibk/dqNIiFa1VKNvGMDDWs+tBGwh/k77qYvfTJrkQPzXAvsRYGNXa8efCfksYkpxkd5FCR6c07KTIIvDMADD7vJUinrYdL/fHvCgHxLtuvi4Rl3KFxRKFr03LXJA4107AA4s8YWG2yh1NVOPEUKWqsW7IJL4ZlD+qvqddOvWIWhgwt0UvRGvpyvT7F7W2HdOiVqqm1dqrXC3f/cYGFIl35o7WZxfYcuuEdJDKw90oZMcDfijaUSwHc88dOk9enEMoO9j40623vpCObZl3LWAqvHCOpXOeWIjo1Cp1dGdAwsqVLvs5WvvddoZXgkl3GcajKabqofq8P7ykwpUnY=
+    enabled: false
   env:
     KAFKA_BOOTSTRAP_SERVERS: thirdplace-kafka-kafka-bootstrap.kafka.svc.cluster.local
     KAFKA_SECURITY_PROTOCOL:
