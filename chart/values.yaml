@@ -19,4 +19,4 @@ service:
     POSTGRES_HOST: user-service-postgresql.user-service.svc.cluster.local
     POSTGRES_PORT: 5432
     POSTGRES_DBNAME: user-service
-    POSTGRES_USER: postgres_admin
+    POSTGRES_USER: user-service
