@@ -3,5 +3,5 @@ apiVersion: v2
 version: 0.0.1
 dependencies:
   - name: service
-    version: 0.0.39
-    repository: https://c8n.io/chartrepo/third-place
+    version: 0.0.50
+    repository: oci://c8n.io/third-place
