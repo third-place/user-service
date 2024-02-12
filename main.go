@@ -5,6 +5,7 @@
 package main
 
 import (
+	"fmt"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/cors"
 	"github.com/third-place/user-service/internal"
@@ -12,6 +13,8 @@ import (
 	"github.com/third-place/user-service/internal/middleware"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 )
 
 func main() {
@@ -19,13 +22,22 @@ func main() {
 	serveHttp()
 }
 
+func getServicePort() int {
+	servicePort, err := strconv.Atoi(os.Getenv("SERVICE_PORT"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return servicePort
+}
+
 func serveHttp() {
-	log.Print("Listening on 8080")
 	router := internal.NewRouter()
 	handler := cors.AllowAll().Handler(router)
+	port := getServicePort()
+	log.Printf("Listening on %d", port)
 	log.Fatal(
 		http.ListenAndServe(
-			":8080",
+			fmt.Sprintf(":%d", port),
 			middleware.CorsMiddleware(
 				middleware.ContentTypeMiddleware(handler),
 			),
