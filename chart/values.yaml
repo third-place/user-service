@@ -11,6 +11,14 @@ service:
     auth:
       username: service_user
       database: user_service
+  ingress:
+    enabled: true
+    paths:
+      - /user
+      - /session
+      - /otp
+      - /forgot-password
+      - /invite
   env:
     KAFKA_BOOTSTRAP_SERVERS: thirdplace-kafka-kafka-bootstrap.kafka.svc.cluster.local
     KAFKA_SECURITY_PROTOCOL:
