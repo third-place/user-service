@@ -1,6 +1,6 @@
 dependencies:
 - name: service
-  repository: oci://c8n.io/third-place
-  version: 0.0.50
-digest: sha256:4ff9a6b191f1d4ae5e230d5add097acc9ea626710c35b01558a65b55b5c16fb5
-generated: "2024-02-12T16:24:32.705834-06:00"
+  repository: oci://ghcr.io/third-place
+  version: 0.0.51
+digest: sha256:f10be66e284d3b0f876510f1da0aecc3c650a80cb2194c581207a1ddecb22fc6
+generated: "2024-02-12T19:18:23.275967-06:00"

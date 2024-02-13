@@ -3,5 +3,5 @@ apiVersion: v2
 version: 0.0.1
 dependencies:
   - name: service
-    version: 0.0.50
-    repository: oci://c8n.io/third-place
+    version: 0.0.51
+    repository: oci://ghcr.io/third-place
