@@ -1,6 +1,6 @@
 dependencies:
 - name: service
   repository: oci://ghcr.io/third-place
-  version: 0.0.54
-digest: sha256:6970aa7ac678f6927e461712674afeb5ee2df399692596d80bba07d06542ca1e
-generated: "2024-02-13T15:23:42.384902-08:00"
+  version: 0.0.56
+digest: sha256:8e8f3d7deb25f62f9f3cf393637d5fce9acdd0da765520dbb99c5dd309e109fc
+generated: "2024-02-14T21:53:37.342668-08:00"
