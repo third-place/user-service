@@ -1,5 +1,6 @@
 service:
   enabled: true
+  serviceType: LoadBalancer
   port: 9004
   targetPort: 8080
   secrets:

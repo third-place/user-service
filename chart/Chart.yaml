@@ -3,7 +3,7 @@ apiVersion: v2
 version: 0.0.1
 dependencies:
   - name: service
-    version: 0.0.57
+    version: 0.0.58
     repository: oci://ghcr.io/third-place
   - name: postgres
     version: 0.0.3
