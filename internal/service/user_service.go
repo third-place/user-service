@@ -285,21 +285,9 @@ func (s *UserService) ConfirmForgotPassword(otp *model.Otp) error {
 	if userEntity.OTP != otp.Code {
 		return errors.New("validation failed")
 	}
-	minSize, digit, special, lowercase, uppercase := util.ValidatePassword(otp.User.Password)
+	minSize := util.ValidatePassword(otp.User.Password)
 	if !minSize {
 		return errors.New("password too short")
-	}
-	if !digit {
-		return errors.New("password needs a number")
-	}
-	if !special {
-		return errors.New("password needs a special character")
-	}
-	if !lowercase {
-		return errors.New("password needs a lowercase letter")
-	}
-	if !uppercase {
-		return errors.New("password needs an uppercase letter")
 	}
 	userEntity.Password, _ = util.HashPassword(otp.User.Password)
 	userEntity.Verified = true
