@@ -77,25 +77,13 @@ func (s *UserService) GetUserFromUuid(userUuid uuid.UUID) (*model.User, error) {
 }
 
 func (s *UserService) CreateUser(newUser *model.NewUser) (*model.User, error) {
-	minSize, digit, special, lower, upper := util.ValidatePassword(newUser.Password)
-	if !minSize || !digit || !special || !lower || !upper {
+	minSize := util.ValidatePassword(newUser.Password)
+	if !minSize {
 		log.Print("cannot create user, invalid password")
 		msg := "passwords: "
 		var errs []string
 		if !minSize {
 			errs = append(errs, "must be at least 8 characters")
-		}
-		if !digit {
-			errs = append(errs, "need at least one digit")
-		}
-		if !special {
-			errs = append(errs, "need at least one special character")
-		}
-		if !lower {
-			errs = append(errs, "need at least one lower case letter")
-		}
-		if !upper {
-			errs = append(errs, "need at least one upper case letter")
 		}
 		return nil, util.NewInputFieldError(
 			"password",
