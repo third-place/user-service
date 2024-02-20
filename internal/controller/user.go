@@ -7,6 +7,7 @@ import (
 	"github.com/third-place/user-service/internal/repository"
 	"github.com/third-place/user-service/internal/service"
 	"github.com/third-place/user-service/internal/util"
+	"log"
 	"net/http"
 )
 
@@ -147,11 +148,13 @@ func UnbanUserV1(c *gin.Context) {
 func SubmitOTPV1(c *gin.Context) {
 	otpModel, err := model.DecodeRequestToOtp(c.Request)
 	if err != nil {
+		log.Print(err.Error())
 		c.Status(http.StatusBadRequest)
 		return
 	}
 	err = service.CreateUserService().SubmitOTP(otpModel)
 	if err != nil {
+		log.Print(err.Error())
 		c.Status(http.StatusBadRequest)
 	}
 }
