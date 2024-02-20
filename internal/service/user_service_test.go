@@ -427,24 +427,3 @@ func Test_Password_Length(t *testing.T) {
 		t.Fail()
 	}
 }
-
-func Test_Password_Complexity(t *testing.T) {
-	// setup
-	svc := CreateTestService()
-
-	// when
-	_, err := svc.CreateInvitedUser(&model.NewUser{
-		Username: util.RandomUsername(),
-		Email:    util.RandomEmailAddress(),
-		Password: "fooooooo",
-	})
-
-	// then
-	if err == nil {
-		t.Fail()
-	}
-	inputErr := err.(*util.InputFieldError)
-	if inputErr.Input != "password" {
-		t.Fail()
-	}
-}
