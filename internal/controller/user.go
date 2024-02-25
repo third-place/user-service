@@ -34,7 +34,13 @@ func CreateNewUserV1(c *gin.Context) {
 func GetUserByUsernameV1(c *gin.Context) {
 	c.Header("Cache-Control", "max-age=30")
 	username := c.Param("username")
-	user, err := service.CreateUserService().GetUserFromUsername(username)
+	userService := service.CreateUserService()
+	session, err := userService.GetSession(util.GetSessionTokenModel(c))
+	if err != nil {
+		c.Status(http.StatusForbidden)
+		return
+	}
+	user, err := service.CreateUserService().GetUserFromUsername(session.User, username)
 	if err != nil {
 		c.Status(http.StatusNotFound)
 		return
@@ -61,7 +67,7 @@ func GetUsersV1(c *gin.Context) {
 		return
 	}
 	c.Header("Cache-Control", "max-age=30")
-	users := service.CreateUserService().GetUsers(offset)
+	users := service.CreateUserService().GetUsers(session.User, offset)
 	c.JSON(http.StatusOK, users)
 }
 

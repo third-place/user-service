@@ -57,7 +57,7 @@ func Test_GetUserByUuid(t *testing.T) {
 	})
 
 	// when
-	getUser, err := svc.GetUserFromUuid(uuid.MustParse(user.Uuid))
+	getUser, err := svc.GetUserFromUuid(nil, uuid.MustParse(user.Uuid))
 
 	// then
 	if err != nil {
@@ -74,7 +74,7 @@ func Test_GetUserByUuid_HandlesMissingUser(t *testing.T) {
 	svc := CreateTestService()
 
 	// when
-	getUser, err := svc.GetUserFromUuid(uuid.New())
+	getUser, err := svc.GetUserFromUuid(nil, uuid.New())
 
 	// then
 	if getUser != nil || err == nil {
@@ -94,7 +94,7 @@ func Test_GetUserByUsername(t *testing.T) {
 	})
 
 	// when
-	getUser, err := svc.GetUserFromUsername(user.Username)
+	getUser, err := svc.GetUserFromUsername(nil, user.Username)
 
 	// then
 	if err != nil {
@@ -113,7 +113,7 @@ func Test_GetUserByUsername_HandlesMissingUser(t *testing.T) {
 	// given
 
 	// when
-	getUser, err := svc.GetUserFromUsername(util.RandomUsername())
+	getUser, err := svc.GetUserFromUsername(nil, util.RandomUsername())
 
 	// then
 	if getUser != nil || err == nil {
@@ -260,7 +260,7 @@ func Test_UserCan_UpdateSelf(t *testing.T) {
 	}
 
 	// when
-	user, _ = svc.GetUserFromUuid(uuid.MustParse(user.Uuid))
+	user, _ = svc.GetUserFromUuid(nil, uuid.MustParse(user.Uuid))
 
 	// then
 	if user.Name != "MyName" {
@@ -301,6 +301,66 @@ func Test_CannotUpdate_OtherUsers(t *testing.T) {
 	// then
 	if err == nil || err.Error() != "unauthorized" {
 		t.Error("expected error when one user updates another user")
+	}
+}
+
+func Test_User_Details_Protected_From_Nil_User(t *testing.T) {
+	// setup
+	svc := CreateTestService()
+
+	// given
+	user, err := svc.CreateInvitedUser(&model.NewUser{
+		Username: util.RandomUsername(),
+		Email:    util.RandomEmailAddress(),
+		Password: dummyPassword,
+	})
+	user.Birthday = "01/01/01"
+	_ = svc.UpdateUser(
+		&model.Session{
+			User: user,
+		},
+		user,
+	)
+
+	// when
+	test, err := svc.GetUserFromUsername(nil, user.Username)
+
+	// then
+	if err != nil {
+		t.Error("expected error when one user updates another user")
+	}
+	if test.Email != "" || test.Birthday != "" {
+		t.Fail()
+	}
+}
+
+func Test_User_Can_See_Own_Details(t *testing.T) {
+	// setup
+	svc := CreateTestService()
+
+	// given
+	user, err := svc.CreateInvitedUser(&model.NewUser{
+		Username: util.RandomUsername(),
+		Email:    util.RandomEmailAddress(),
+		Password: dummyPassword,
+	})
+	user.Birthday = "01/01/01"
+	_ = svc.UpdateUser(
+		&model.Session{
+			User: user,
+		},
+		user,
+	)
+
+	// when
+	test, err := svc.GetUserFromUsername(user, user.Username)
+
+	// then
+	if err != nil {
+		t.Error("expected error when one user updates another user")
+	}
+	if test.Birthday == "" {
+		t.Fail()
 	}
 }
 

@@ -55,25 +55,44 @@ func CreateUserService() *UserService {
 	}
 }
 
-func (s *UserService) GetUserFromUsername(username string) (*model.User, error) {
+func isPrivileged(role model.Role) bool {
+	return role == model.MODERATOR || role == model.ADMIN
+}
+
+func filterUserModelForAccess(viewerUser *model.User, user *model.User) *model.User {
+	if viewerUser == nil || (user.Uuid != viewerUser.Uuid && !isPrivileged(viewerUser.Role)) {
+		user.Birthday = ""
+		user.Email = ""
+	}
+	return user
+}
+
+func filterUserModelsForAccess(viewerUser *model.User, users []*model.User) []*model.User {
+	for i, user := range users {
+		users[i] = filterUserModelForAccess(viewerUser, user)
+	}
+	return users
+}
+
+func (s *UserService) GetUserFromUsername(viewerUser *model.User, username string) (*model.User, error) {
 	userEntity, err := s.userRepository.GetUserFromUsername(username)
 	if err != nil {
 		return nil, err
 	}
-	return mapper.MapUserEntityToModel(userEntity), nil
+	return filterUserModelForAccess(viewerUser, mapper.MapUserEntityToModel(userEntity)), nil
 }
 
-func (s *UserService) GetUsers(offset int) []*model.User {
+func (s *UserService) GetUsers(viewerUser *model.User, offset int) []*model.User {
 	userEntities := s.userRepository.GetUsers(offset)
-	return mapper.MapUserEntitiesToModels(userEntities)
+	return filterUserModelsForAccess(viewerUser, mapper.MapUserEntitiesToModels(userEntities))
 }
 
-func (s *UserService) GetUserFromUuid(userUuid uuid.UUID) (*model.User, error) {
+func (s *UserService) GetUserFromUuid(viewerUser *model.User, userUuid uuid.UUID) (*model.User, error) {
 	userEntity, err := s.userRepository.GetUserFromUuid(userUuid)
 	if err != nil {
 		return nil, err
 	}
-	return mapper.MapUserEntityToModel(userEntity), nil
+	return filterUserModelForAccess(viewerUser, mapper.MapUserEntityToModel(userEntity)), nil
 }
 
 func (s *UserService) CreateUser(newUser *model.NewUser) (*model.User, error) {

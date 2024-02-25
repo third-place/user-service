@@ -15,6 +15,7 @@ func MapUserEntityToModel(user *entity.User) *model.User {
 		Role:       model.Role(user.Role),
 		IsBanned:   user.IsBanned,
 		BioMessage: user.BioMessage,
+		Birthday:   user.Birthday,
 		CreatedAt:  user.CreatedAt,
 	}
 }
