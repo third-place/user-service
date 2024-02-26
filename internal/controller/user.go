@@ -37,6 +37,7 @@ func GetUserByUsernameV1(c *gin.Context) {
 	userService := service.CreateUserService()
 	session, err := userService.GetSession(util.GetSessionTokenModel(c))
 	if err != nil {
+		log.Print(err)
 		c.Status(http.StatusForbidden)
 		return
 	}
