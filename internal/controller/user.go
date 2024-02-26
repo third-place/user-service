@@ -35,13 +35,15 @@ func GetUserByUsernameV1(c *gin.Context) {
 	c.Header("Cache-Control", "max-age=30")
 	username := c.Param("username")
 	userService := service.CreateUserService()
-	session, err := userService.GetSession(util.GetSessionTokenModel(c))
-	if err != nil {
-		log.Print(err)
-		c.Status(http.StatusForbidden)
-		return
+	token := util.GetSessionTokenModel(c)
+	var viewerUser *model.User = nil
+	if token != nil {
+		session, err := userService.GetSession(token)
+		if err != nil {
+			viewerUser = session.User
+		}
 	}
-	user, err := service.CreateUserService().GetUserFromUsername(session.User, username)
+	user, err := service.CreateUserService().GetUserFromUsername(viewerUser, username)
 	if err != nil {
 		c.Status(http.StatusNotFound)
 		return

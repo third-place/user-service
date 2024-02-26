@@ -10,6 +10,9 @@ import (
 
 func GetSessionTokenModel(c *gin.Context) *model.SessionToken {
 	sessionToken := c.GetHeader("x-session-token")
+	if sessionToken == "" {
+		return nil
+	}
 	return &model.SessionToken{
 		Token: sessionToken,
 	}
