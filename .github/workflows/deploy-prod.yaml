@@ -2,7 +2,6 @@ on:
   workflow_dispatch:
 jobs:
   deploy-service:
-    needs: publish-docker-image
     uses: third-place/actions/.github/workflows/deploy-env.yaml@main
     with:
       env: prod
