@@ -1,0 +1,10 @@
+on:
+  workflow_dispatch:
+jobs:
+  deploy-service:
+    needs: publish-docker-image
+    uses: third-place/actions/.github/workflows/deploy-prod.yaml@main
+    with:
+      env: prod
+    secrets:
+      PAT: ${{ secrets.CR_PAT }}
