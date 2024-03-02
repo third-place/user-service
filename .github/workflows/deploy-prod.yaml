@@ -3,7 +3,7 @@ on:
 jobs:
   deploy-service:
     needs: publish-docker-image
-    uses: third-place/actions/.github/workflows/deploy-prod.yaml@main
+    uses: third-place/actions/.github/workflows/deploy-env.yaml@main
     with:
       env: prod
     secrets:
