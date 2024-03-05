@@ -17,5 +17,4 @@ jobs:
     uses: third-place/actions/.github/workflows/deploy-env.yaml@main
     with:
       env: dev
-    secrets:
-      PAT: ${{ secrets.CR_PAT }}
+    secrets: inherit
