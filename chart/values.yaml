@@ -3,6 +3,7 @@ service:
   serviceType: LoadBalancer
   port: 9004
   targetPort: 8080
+  nodePort: 30101
   ingress:
     enabled: true
     paths:
