@@ -15,12 +15,11 @@ import (
 )
 
 type Image struct {
-
 	Uuid string `json:"uuid"`
 
 	Filename string `json:"filename"`
 
-	S3Key string `json:"s3_key"`
+	Key string `json:"key"`
 
 	CreatedAt time.Time `json:"created_at"`
 

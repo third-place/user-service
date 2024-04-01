@@ -51,8 +51,8 @@ func loopConsumer(userRepository *repository.UserRepository) error {
 			log.Print("user not found when updating profile pic")
 			continue
 		}
-		log.Print("update user with s3 key", userEntity.Uuid.String(), image.S3Key)
-		userEntity.ProfilePic = image.S3Key
+		log.Print("update user with key", userEntity.Uuid.String(), image.Key)
+		userEntity.ProfilePic = image.Key
 		userRepository.Save(userEntity)
 	}
 }
