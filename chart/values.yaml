@@ -12,6 +12,13 @@ service:
       - /otp
       - /forgot-password
       - /invite
+  resources:
+    requests:
+      memory: 1000Mi
+      cpu: 500m
+    limits:
+      memory: 1250Mi
+      cpu: 750m
 postgres:
   auth:
     username: service_user
