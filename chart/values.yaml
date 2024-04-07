@@ -14,11 +14,11 @@ service:
       - /invite
   resources:
     requests:
-      memory: 1000Mi
-      cpu: 500m
+      memory: 256Mi
+      cpu: 250m
     limits:
-      memory: 1250Mi
-      cpu: 750m
+      memory: 512Mi
+      cpu: 500m
 postgres:
   auth:
     username: service_user
