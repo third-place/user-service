@@ -23,7 +23,11 @@ func main() {
 }
 
 func getServicePort() int {
-	servicePort, err := strconv.Atoi(os.Getenv("SERVICE_PORT"))
+	port, ok := os.LookupEnv("SERVICE_PORT")
+	if !ok {
+		port = "8080"
+	}
+	servicePort, err := strconv.Atoi(port)
 	if err != nil {
 		log.Fatal(err)
 	}
