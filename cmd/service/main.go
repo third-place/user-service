@@ -1,26 +1,15 @@
-/*
- * User service
- */
-
 package main
 
 import (
 	"fmt"
-	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/cors"
 	"github.com/third-place/user-service/internal"
-	"github.com/third-place/user-service/internal/kafka"
 	"github.com/third-place/user-service/internal/middleware"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 )
-
-func main() {
-	go readKafka()
-	serveHttp()
-}
 
 func getServicePort() int {
 	port, ok := os.LookupEnv("SERVICE_PORT")
@@ -34,7 +23,7 @@ func getServicePort() int {
 	return servicePort
 }
 
-func serveHttp() {
+func main() {
 	router := internal.NewRouter()
 	handler := cors.AllowAll().Handler(router)
 	port := getServicePort()
@@ -47,10 +36,4 @@ func serveHttp() {
 			),
 		),
 	)
-}
-
-func readKafka() {
-	log.Print("connecting to kafka")
-	kafka.InitializeAndRunLoop()
-	log.Print("exit kafka loop")
 }
