@@ -1,0 +1,13 @@
+FROM golang:1.22
+WORKDIR /go/src
+COPY internal ./internal
+COPY cmd ./cmd
+COPY go.sum .
+COPY go.mod .
+
+WORKDIR /go/src/cmd/consumer
+RUN go build
+
+ENV GIN_MODE=release
+EXPOSE 8080
+ENTRYPOINT ["./consumer"]
