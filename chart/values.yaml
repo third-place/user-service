@@ -19,6 +19,15 @@ service:
     limits:
       memory: 512Mi
       cpu: 500m
+consumer:
+  enabled: true
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 512Mi
+      cpu: 500m
 postgres:
   auth:
     username: service_user
