@@ -21,7 +21,7 @@ type User struct {
 	AddressCity   string
 	AddressZip    string
 	Email         string `gorm:"unique;not null"`
-	Password      string `gorm:"not null"`
+	Password      string `gorm:"null"`
 	Birthday      string
 	Verified      bool `gorm:"not null"`
 	InviteID      uint
@@ -30,7 +30,7 @@ type User struct {
 	Passwords     []*Password
 }
 
-func (u *User) UpdateUserProfileFromModel(user *model.User) {
+func (u *User) UpdateUserFromModel(user *model.User) {
 	u.Name = user.Name
 	u.BioMessage = user.BioMessage
 	u.Birthday = user.Birthday

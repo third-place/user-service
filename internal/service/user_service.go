@@ -147,6 +147,7 @@ func (s *UserService) CreateUser(newUser *model.NewUser) (*model.User, error) {
 	invite.Claimed = true
 	s.inviteRepository.Save(invite)
 	user.OTP = util.GenerateCode()
+	user.Password, _ = util.HashPassword(user.ID, newUser.Password)
 	s.userRepository.Save(user)
 	_, err = s.mailService.SendVerificationEmail(user)
 	if err != nil {
@@ -168,7 +169,7 @@ func (s *UserService) UpdateUser(session *model.Session, userModel *model.User) 
 	if err != nil {
 		return err
 	}
-	userEntity.UpdateUserProfileFromModel(userModel)
+	userEntity.UpdateUserFromModel(userModel)
 	s.userRepository.Save(userEntity)
 	_ = s.publishUserToKafka(userEntity)
 	return nil
@@ -194,7 +195,7 @@ func (s *UserService) CreateSession(newSession *model.NewSession) (*model.Sessio
 			"email not found, do you need to sign up?",
 		)
 	}
-	if !util.CheckPasswordHash(newSession.Password, search.Password) {
+	if !util.CheckPasswordHash(search.ID, newSession.Password, search.Password) {
 		return nil, errors.New("authentication failed")
 	}
 	token, err := s.getJWT(search)
@@ -308,7 +309,7 @@ func (s *UserService) ConfirmForgotPassword(otp *model.Otp) error {
 	if !minSize {
 		return errors.New("password too short")
 	}
-	userEntity.Password, _ = util.HashPassword(otp.User.Password)
+	userEntity.Password, _ = util.HashPassword(userEntity.ID, otp.User.Password)
 	userEntity.Verified = true
 	s.userRepository.Save(userEntity)
 	return nil
