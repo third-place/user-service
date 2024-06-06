@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/google/uuid"
-	"github.com/joho/godotenv"
 	"github.com/third-place/user-service/internal/model"
 	"github.com/third-place/user-service/internal/util"
 	"math/rand"
@@ -18,9 +17,6 @@ func init() {
 const dummyPassword = "fOobar12345!"
 
 func TestMain(m *testing.M) {
-	if os.Getenv("CI") == "" {
-		_ = godotenv.Load()
-	}
 	os.Exit(m.Run())
 }
 
