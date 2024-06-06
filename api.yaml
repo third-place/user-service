@@ -38,7 +38,7 @@ paths:
             201 response
     put:
       operationId: updateUserV1
-      summary: Update a username
+      summary: Update a user
       requestBody:
         description: user to update
         required: true
