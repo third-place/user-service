@@ -141,7 +141,7 @@ func (s *UserService) CreateUser(newUser *model.NewUser) (*model.User, error) {
 	invite.Claimed = true
 	s.inviteRepository.Save(invite)
 	user.OTP = util.GenerateCode()
-	user.Password, _ = util.HashPassword(user.ID, newUser.Password)
+	user.Password, _ = util.HashPassword(newUser.Password)
 	s.userRepository.Save(user)
 	_, err = s.mailService.SendVerificationEmail(user)
 	if err != nil {
@@ -189,7 +189,7 @@ func (s *UserService) CreateSession(newSession *model.NewSession) (*model.Sessio
 			"email not found, do you need to sign up?",
 		)
 	}
-	if !util.CheckPasswordHash(search.ID, newSession.Password, search.Password) {
+	if !util.CheckPasswordHash(newSession.Password, search.Password) {
 		return nil, errors.New("authentication failed")
 	}
 	token, err := s.getJWT(search)
@@ -303,7 +303,7 @@ func (s *UserService) ConfirmForgotPassword(otp *model.Otp) error {
 	if !minSize {
 		return errors.New("password too short")
 	}
-	userEntity.Password, err = util.HashPassword(userEntity.ID, otp.User.Password)
+	userEntity.Password, err = util.HashPassword(otp.User.Password)
 	if err != nil {
 		log.Print(err.Error())
 		return errors.New("error with password")
