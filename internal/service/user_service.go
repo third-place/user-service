@@ -303,7 +303,11 @@ func (s *UserService) ConfirmForgotPassword(otp *model.Otp) error {
 	if !minSize {
 		return errors.New("password too short")
 	}
-	userEntity.Password, _ = util.HashPassword(userEntity.ID, otp.User.Password)
+	userEntity.Password, err = util.HashPassword(userEntity.ID, otp.User.Password)
+	if err != nil {
+		log.Print(err.Error())
+		return errors.New("error with password")
+	}
 	userEntity.Verified = true
 	s.userRepository.Save(userEntity)
 	return nil

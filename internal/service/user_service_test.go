@@ -513,4 +513,10 @@ func Test_Can_Reset_Password(t *testing.T) {
 	if err != nil {
 		t.Fail()
 	}
+
+	userEntity, err = userRepository.GetUserFromUuid(uuid.MustParse(userModel.Uuid))
+
+	if err != nil || userEntity.Password == "" {
+		t.Fail()
+	}
 }
