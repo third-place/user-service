@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/google/uuid"
 	"github.com/third-place/user-service/internal/model"
+	"github.com/third-place/user-service/internal/repository"
 	"github.com/third-place/user-service/internal/util"
 	"math/rand"
 	"os"
@@ -480,6 +481,36 @@ func Test_Password_Length(t *testing.T) {
 	}
 	inputErr := err.(*util.InputFieldError)
 	if inputErr.Input != "password" {
+		t.Fail()
+	}
+}
+
+func Test_Can_Reset_Password(t *testing.T) {
+	// setup
+	svc := CreateTestService()
+	conn := util.SetupTestDatabase()
+	userRepository := repository.CreateUserRepository(conn)
+
+	// given
+	userModel, _ := svc.CreateInvitedUser(&model.NewUser{
+		Username: util.RandomUsername(),
+		Email:    util.RandomEmailAddress(),
+		Password: "abc123_456_789",
+	})
+
+	// when
+	_ = svc.ForgotPassword(userModel)
+	userEntity, _ := userRepository.GetUserFromUuid(uuid.MustParse(userModel.Uuid))
+	userModel.Email = userEntity.Email
+	userModel.Password = "xyz123_456_789"
+
+	// then
+	err := svc.ConfirmForgotPassword(&model.Otp{
+		User: userModel,
+		Code: userEntity.OTP,
+	})
+
+	if err != nil {
 		t.Fail()
 	}
 }

@@ -13,7 +13,6 @@ import (
 	"github.com/third-place/user-service/internal/repository"
 	"github.com/third-place/user-service/internal/util"
 	"log"
-	"strings"
 	"time"
 )
 
@@ -99,14 +98,9 @@ func (s *UserService) CreateUser(newUser *model.NewUser) (*model.User, error) {
 	minSize := util.ValidatePassword(newUser.Password)
 	if !minSize {
 		log.Print("cannot create user, invalid password")
-		msg := "passwords: "
-		var errs []string
-		if !minSize {
-			errs = append(errs, "must be at least 8 characters")
-		}
 		return nil, util.NewInputFieldError(
 			"password",
-			msg+strings.Join(errs, ", "),
+			"passwords must be at least 8 characters",
 		)
 	}
 	invite, err := s.inviteRepository.FindOneByCode(newUser.InviteCode)

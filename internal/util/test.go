@@ -11,7 +11,6 @@ import (
 	kafka2 "github.com/third-place/user-service/internal/kafka"
 	"gorm.io/gorm"
 	"math/rand"
-	"os"
 	"strconv"
 	"time"
 )
@@ -31,8 +30,8 @@ func RandomUsername() string {
 func RandomEmailAddress() string {
 	s := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(s)
-	num := r.Intn(100000)
-	return os.Getenv("EMAIL_PREFIX") + "+" + strconv.Itoa(num) + "@" + os.Getenv("EMAIL_DOMAIN")
+	num := r.Intn(10000000)
+	return "test-email-" + strconv.Itoa(num) + "@test.com"
 }
 
 func SetupTestDatabase() *gorm.DB {

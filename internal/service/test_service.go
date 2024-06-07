@@ -59,6 +59,14 @@ func (t *TestService) GetSession(sessionToken *model.SessionToken) (*model.Sessi
 	return t.userService.GetSession(sessionToken)
 }
 
+func (t *TestService) ForgotPassword(userModel *model.User) error {
+	return t.userService.ForgotPassword(userModel)
+}
+
+func (t *TestService) ConfirmForgotPassword(otp *model.Otp) error {
+	return t.userService.ConfirmForgotPassword(otp)
+}
+
 func (t *TestService) createInvite() (*model.Invite, error) {
 	invite := &entity.Invite{
 		Code: util.GenerateCode(),

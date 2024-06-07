@@ -15,7 +15,7 @@ import (
 )
 
 type Otp struct {
-	User User `json:"user,omitempty"`
+	User *User `json:"user,omitempty"`
 
 	Code string `json:"code,omitempty"`
 }
